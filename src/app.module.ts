@@ -9,6 +9,7 @@ import { BudgetModule } from './modules/budget/budget.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TreasuryModule } from './modules/treasury/treasury.module';
 import { ConfigService } from './config/config.service';
+import { LoggingService } from './config/logging.service';
 import configuration from './config/configuration';
 import { ConfigModule } from '@nestjs/config';
 
@@ -26,7 +27,8 @@ import { ConfigModule } from '@nestjs/config';
     AuthModule,
     TreasuryModule,
   ],
+  exports: [ConfigService, LoggingService],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ConfigService, LoggingService],
 })
 export class AppModule {}
