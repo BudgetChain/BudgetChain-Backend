@@ -8,9 +8,24 @@ import { BlockchainModule } from './modules/blockchain/blockchain.module';
 import { BudgetModule } from './modules/budget/budget.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TreasuryModule } from './modules/treasury/treasury.module';
+import { ConfigService } from './config/config.service';
+import configuration from './config/configuration';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UserModule, AiModule, ReportingModule, BlockchainModule, BudgetModule, AuthModule, TreasuryModule],
+  imports: [
+    ConfigModule.forRoot({
+      load: [configuration],
+      isGlobal: true, // Makes the ConfigService available everywhere
+    }),
+    UserModule,
+    AiModule,
+    ReportingModule,
+    BlockchainModule,
+    BudgetModule,
+    AuthModule,
+    TreasuryModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
