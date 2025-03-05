@@ -109,74 +109,74 @@ jobs:
           name: dist
           path: dist
 
-  deploy-staging:
-    name: Deploy to Staging
-    needs: build
-    if: github.ref == 'refs/heads/develop'
-    runs-on: ubuntu-latest
-    environment:
-      name: staging
-      url: https://staging-api.budgetchain.com
+  # deploy-staging:
+  #   name: Deploy to Staging
+  #   needs: build
+  #   if: github.ref == 'refs/heads/develop'
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: staging
+  #     url: https://staging-api.budgetchain.com
     
-    steps:
-      - uses: actions/checkout@v4
+  #   steps:
+  #     - uses: actions/checkout@v4
       
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: dist
-          path: dist
+  #     - name: Download build artifacts
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: dist
+  #         path: dist
           
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ secrets.AWS_REGION }}
           
-      - name: Deploy to AWS Elastic Beanstalk
-        run: |
-          aws elasticbeanstalk create-application-version \
-            --application-name budgetchain-backend \
-            --version-label "staging-${{ github.sha }}" \
-            --source-bundle S3Bucket="${{ secrets.EB_BUCKET }}",S3Key="staging-${{ github.sha }}.zip"
+  #     - name: Deploy to AWS Elastic Beanstalk
+  #       run: |
+  #         aws elasticbeanstalk create-application-version \
+  #           --application-name budgetchain-backend \
+  #           --version-label "staging-${{ github.sha }}" \
+  #           --source-bundle S3Bucket="${{ secrets.EB_BUCKET }}",S3Key="staging-${{ github.sha }}.zip"
           
-          aws elasticbeanstalk update-environment \
-            --environment-name budgetchain-staging \
-            --version-label "staging-${{ github.sha }}"
+  #         aws elasticbeanstalk update-environment \
+  #           --environment-name budgetchain-staging \
+  #           --version-label "staging-${{ github.sha }}"
 
-  deploy-production:
-    name: Deploy to Production
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://api.budgetchain.com
+  # deploy-production:
+  #   name: Deploy to Production
+  #   needs: build
+  #   if: github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: production
+  #     url: https://api.budgetchain.com
     
-    steps:
-      - uses: actions/checkout@v4
+  #   steps:
+  #     - uses: actions/checkout@v4
       
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: dist
-          path: dist
+  #     - name: Download build artifacts
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: dist
+  #         path: dist
           
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ secrets.AWS_REGION }}
           
-      - name: Deploy to AWS Elastic Beanstalk
-        run: |
-          aws elasticbeanstalk create-application-version \
-            --application-name budgetchain-backend \
-            --version-label "prod-${{ github.sha }}" \
-            --source-bundle S3Bucket="${{ secrets.EB_BUCKET }}",S3Key="prod-${{ github.sha }}.zip"
+  #     - name: Deploy to AWS Elastic Beanstalk
+  #       run: |
+  #         aws elasticbeanstalk create-application-version \
+  #           --application-name budgetchain-backend \
+  #           --version-label "prod-${{ github.sha }}" \
+  #           --source-bundle S3Bucket="${{ secrets.EB_BUCKET }}",S3Key="prod-${{ github.sha }}.zip"
           
-          aws elasticbeanstalk update-environment \
-            --environment-name budgetchain-production \
-            --version-label "prod-${{ github.sha }}" 
+  #         aws elasticbeanstalk update-environment \
+  #           --environment-name budgetchain-production \
+  #           --version-label "prod-${{ github.sha }}" 
