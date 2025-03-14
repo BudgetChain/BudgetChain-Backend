@@ -12,11 +12,14 @@ import { ConfigService } from './config/config.service';
 import { LoggingService } from './config/logging.service';
 import configuration from './config/configuration';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './modules/user/user.entity'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
+      envFilePath: '.env',
       isGlobal: true, // Makes the ConfigService available everywhere
     }),
     UserModule,
@@ -26,6 +29,17 @@ import { ConfigModule } from '@nestjs/config';
     BudgetModule,
     AuthModule,
     TreasuryModule,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DATABASE_HOST || 'localhost',
+      port: parseInt(process.env.DATABASE_PORT || '5432'),
+      username: process.env.DATABASE_USERNAME,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_NAME,
+      entities: [__dirname + '/**/*.entity{.ts, .js}'], // add all entities here
+      synchronize: true, // when true: automatically creates the schema in development (make sure to disable in production)
+    }),
+    TypeOrmModule.forFeature([User]), // add entities in the square bracket
   ],
   exports: [ConfigService, LoggingService],
   controllers: [AppController],
