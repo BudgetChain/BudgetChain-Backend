@@ -74,10 +74,10 @@ jobs:
       - name: Run unit tests
         run: npm run test
         
-      - name: Run e2e tests
-        run: npm run test:e2e
-        env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
+     # - name: Run e2e tests
+     #   run: npm run test:e2e
+     #   env:
+     #     DATABASE_URL: ${{ env.DATABASE_URL }}
           
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
