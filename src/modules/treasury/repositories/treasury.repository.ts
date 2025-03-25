@@ -14,7 +14,7 @@ export class TreasuryRepository {
     return this.treasuryRepository.find();
   }
 
-  async findById(id: string): Promise<Treasury> {
+  async findById(id: string): Promise<Treasury | null> {
     return this.treasuryRepository.findOne({ where: { id } });
   }
 
@@ -27,7 +27,10 @@ export class TreasuryRepository {
     return this.treasuryRepository.save(newTreasury);
   }
 
-  async update(id: string, treasury: Partial<Treasury>): Promise<Treasury> {
+  async update(
+    id: string,
+    treasury: Partial<Treasury>,
+  ): Promise<Treasury | null> {
     await this.treasuryRepository.update(id, treasury);
     return this.findById(id);
   }

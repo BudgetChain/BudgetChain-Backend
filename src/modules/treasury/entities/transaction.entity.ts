@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Treasury } from './treasury.entity';
 import { Asset } from './asset.entity';
 
@@ -33,14 +41,14 @@ export class Transaction {
   @Column()
   treasuryId: string;
 
-  @ManyToOne(() => Treasury, treasury => treasury.transactions)
+  @ManyToOne(() => Treasury, (treasury) => treasury.transactions)
   @JoinColumn({ name: 'treasuryId' })
   treasury: Treasury;
 
   @Column({ nullable: true })
   assetId: string;
 
-  @ManyToOne(() => Asset, asset => asset.transactions, { nullable: true })
+  @ManyToOne(() => Asset, (asset) => asset.transactions, { nullable: true })
   @JoinColumn({ name: 'assetId' })
   asset: Asset;
 

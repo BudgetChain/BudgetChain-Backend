@@ -14,21 +14,21 @@ export class AllocationRepository {
     return this.allocationRepository.find();
   }
 
-  async findById(id: string): Promise<Allocation> {
+  async findById(id: string): Promise<Allocation | null> {
     return this.allocationRepository.findOne({ where: { id } });
   }
 
   async findByBudgetId(budgetId: string): Promise<Allocation[]> {
-    return this.allocationRepository.find({ 
+    return this.allocationRepository.find({
       where: { budgetId },
-      order: { createdAt: 'DESC' }
+      order: { createdAt: 'DESC' },
     });
   }
 
   async findByStatus(status: AllocationStatus): Promise<Allocation[]> {
-    return this.allocationRepository.find({ 
+    return this.allocationRepository.find({
       where: { status },
-      order: { updatedAt: 'DESC' }
+      order: { updatedAt: 'DESC' },
     });
   }
 
@@ -37,7 +37,10 @@ export class AllocationRepository {
     return this.allocationRepository.save(newAllocation);
   }
 
-  async update(id: string, allocation: Partial<Allocation>): Promise<Allocation> {
+  async update(
+    id: string,
+    allocation: Partial<Allocation>,
+  ): Promise<Allocation | null> {
     await this.allocationRepository.update(id, allocation);
     return this.findById(id);
   }

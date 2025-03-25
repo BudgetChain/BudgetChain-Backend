@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AssetService } from '../services/asset.service';
 import { Asset } from '../entities/asset.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -23,7 +33,10 @@ export class AssetController {
   }
 
   @Post()
-  async create(@Body() asset: Partial<Asset>, @CurrentUser() user: any): Promise<Asset> {
+  async create(
+    @Body() asset: Partial<Asset>,
+    @CurrentUser() user: any,
+  ): Promise<Asset> {
     return this.assetService.create(asset, user.id);
   }
 
@@ -37,7 +50,10 @@ export class AssetController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string, @CurrentUser() user: any): Promise<void> {
+  async delete(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ): Promise<void> {
     return this.assetService.delete(id, user.id);
   }
 

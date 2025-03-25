@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AllocationService } from '../services/allocation.service';
 import { Allocation, AllocationStatus } from '../entities/allocation.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -10,7 +20,10 @@ export class AllocationController {
   constructor(private allocationService: AllocationService) {}
 
   @Get()
-  async findAll(@Query('budgetId') budgetId?: string, @Query('status') status?: AllocationStatus): Promise<Allocation[]> {
+  async findAll(
+    @Query('budgetId') budgetId?: string,
+    @Query('status') status?: AllocationStatus,
+  ): Promise<Allocation[]> {
     if (budgetId) {
       return this.allocationService.findByBudgetId(budgetId);
     }
@@ -26,7 +39,10 @@ export class AllocationController {
   }
 
   @Post()
-  async create(@Body() allocation: Partial<Allocation>, @CurrentUser() user: any): Promise<Allocation> {
+  async create(
+    @Body() allocation: Partial<Allocation>,
+    @CurrentUser() user: any,
+  ): Promise<Allocation> {
     return this.allocationService.create(allocation, user.id);
   }
 
@@ -40,17 +56,26 @@ export class AllocationController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string, @CurrentUser() user: any): Promise<void> {
+  async delete(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ): Promise<void> {
     return this.allocationService.delete(id, user.id);
   }
 
   @Post(':id/approve')
-  async approveAllocation(@Param('id') id: string, @CurrentUser() user: any): Promise<Allocation> {
+  async approveAllocation(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ): Promise<Allocation> {
     return this.allocationService.approveAllocation(id, user.id);
   }
 
   @Post(':id/release')
-  async releaseAllocation(@Param('id') id: string, @CurrentUser() user: any): Promise<Allocation> {
+  async releaseAllocation(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ): Promise<Allocation> {
     return this.allocationService.releaseAllocation(id, user.id);
   }
 }

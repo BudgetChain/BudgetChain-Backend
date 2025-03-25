@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { TreasuryService } from '../services/treasury.service';
 import { AssetService } from '../services/asset.service';
 import { Treasury } from '../entities/treasury.entity';
@@ -15,7 +25,9 @@ export class TreasuryController {
   ) {}
 
   @Get()
-  async findAll(@Query('organizationId') organizationId?: string): Promise<Treasury[]> {
+  async findAll(
+    @Query('organizationId') organizationId?: string,
+  ): Promise<Treasury[]> {
     if (organizationId) {
       return this.treasuryService.findByOrganizationId(organizationId);
     }
@@ -28,7 +40,10 @@ export class TreasuryController {
   }
 
   @Post()
-  async create(@Body() treasury: Partial<Treasury>, @CurrentUser() user: any): Promise<Treasury> {
+  async create(
+    @Body() treasury: Partial<Treasury>,
+    @CurrentUser() user: any,
+  ): Promise<Treasury> {
     return this.treasuryService.create(treasury, user.id);
   }
 
@@ -42,12 +57,17 @@ export class TreasuryController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string, @CurrentUser() user: any): Promise<void> {
+  async delete(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ): Promise<void> {
     return this.treasuryService.delete(id, user.id);
   }
 
   @Get(':id/balance')
-  async getTotalBalance(@Param('id') id: string): Promise<{ totalBalance: number }> {
+  async getTotalBalance(
+    @Param('id') id: string,
+  ): Promise<{ totalBalance: number }> {
     const totalBalance = await this.treasuryService.calculateTotalBalance(id);
     return { totalBalance };
   }

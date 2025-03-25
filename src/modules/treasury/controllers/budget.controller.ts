@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { BudgetService } from '../services/budget.service';
 import { AllocationService } from '../services/allocation.service';
 import { Budget, BudgetStatus } from '../entities/budget.entity';
@@ -15,7 +25,10 @@ export class BudgetController {
   ) {}
 
   @Get()
-  async findAll(@Query('treasuryId') treasuryId?: string, @Query('status') status?: BudgetStatus): Promise<Budget[]> {
+  async findAll(
+    @Query('treasuryId') treasuryId?: string,
+    @Query('status') status?: BudgetStatus,
+  ): Promise<Budget[]> {
     if (treasuryId) {
       return this.budgetService.findByTreasuryId(treasuryId);
     }
@@ -31,7 +44,10 @@ export class BudgetController {
   }
 
   @Post()
-  async create(@Body() budget: Partial<Budget>, @CurrentUser() user: any): Promise<Budget> {
+  async create(
+    @Body() budget: Partial<Budget>,
+    @CurrentUser() user: any,
+  ): Promise<Budget> {
     return this.budgetService.create(budget, user.id);
   }
 
@@ -45,22 +61,34 @@ export class BudgetController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string, @CurrentUser() user: any): Promise<void> {
+  async delete(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ): Promise<void> {
     return this.budgetService.delete(id, user.id);
   }
 
   @Post(':id/submit')
-  async submitBudget(@Param('id') id: string, @CurrentUser() user: any): Promise<Budget> {
+  async submitBudget(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ): Promise<Budget> {
     return this.budgetService.submitBudget(id, user.id);
   }
 
   @Post(':id/approve')
-  async approveBudget(@Param('id') id: string, @CurrentUser() user: any): Promise<Budget> {
+  async approveBudget(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ): Promise<Budget> {
     return this.budgetService.approveBudget(id, user.id);
   }
 
   @Post(':id/reject')
-  async rejectBudget(@Param('id') id: string, @CurrentUser() user: any): Promise<Budget> {
+  async rejectBudget(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ): Promise<Budget> {
     return this.budgetService.rejectBudget(id, user.id);
   }
 

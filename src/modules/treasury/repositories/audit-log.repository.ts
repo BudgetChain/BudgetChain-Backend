@@ -14,21 +14,21 @@ export class AuditLogRepository {
     return this.auditLogRepository.find();
   }
 
-  async findById(id: string): Promise<AuditLog> {
+  async findById(id: string): Promise<AuditLog | null> {
     return this.auditLogRepository.findOne({ where: { id } });
   }
 
   async findByTreasuryId(treasuryId: string): Promise<AuditLog[]> {
-    return this.auditLogRepository.find({ 
+    return this.auditLogRepository.find({
       where: { treasuryId },
-      order: { timestamp: 'DESC' }
+      order: { timestamp: 'DESC' },
     });
   }
 
   async findByEntityId(entityId: string): Promise<AuditLog[]> {
-    return this.auditLogRepository.find({ 
+    return this.auditLogRepository.find({
       where: { entityId },
-      order: { timestamp: 'DESC' }
+      order: { timestamp: 'DESC' },
     });
   }
 

@@ -14,7 +14,7 @@ export class AssetRepository {
     return this.assetRepository.find();
   }
 
-  async findById(id: string): Promise<Asset> {
+  async findById(id: string): Promise<Asset | null> {
     return this.assetRepository.findOne({ where: { id } });
   }
 
@@ -27,7 +27,7 @@ export class AssetRepository {
     return this.assetRepository.save(newAsset);
   }
 
-  async update(id: string, asset: Partial<Asset>): Promise<Asset> {
+  async update(id: string, asset: Partial<Asset>): Promise<Asset | null> {
     await this.assetRepository.update(id, asset);
     return this.findById(id);
   }

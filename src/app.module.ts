@@ -13,7 +13,7 @@ import { LoggingService } from './config/logging.service';
 import configuration from './config/configuration';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './modules/user/user.entity'
+import { User } from './modules/user/user.entity';
 
 @Module({
   imports: [

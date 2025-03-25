@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Treasury } from './treasury.entity';
 
 @Entity('risk_assessments')
@@ -9,7 +15,7 @@ export class RiskAssessment {
   @Column()
   treasuryId: string;
 
-  @ManyToOne(() => Treasury, treasury => treasury.riskAssessments)
+  @ManyToOne(() => Treasury, (treasury) => treasury.riskAssessments)
   @JoinColumn({ name: 'treasuryId' })
   treasury: Treasury;
 

@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { Treasury } from './treasury.entity';
 import { Transaction } from './transaction.entity';
 
@@ -25,11 +34,11 @@ export class Asset {
   @Column()
   treasuryId: string;
 
-  @ManyToOne(() => Treasury, treasury => treasury.assets)
+  @ManyToOne(() => Treasury, (treasury) => treasury.assets)
   @JoinColumn({ name: 'treasuryId' })
   treasury: Treasury;
 
-  @OneToMany(() => Transaction, transaction => transaction.asset)
+  @OneToMany(() => Transaction, (transaction) => transaction.asset)
   transactions: Transaction[];
 
   @Column({ type: 'jsonb', default: '{}' })

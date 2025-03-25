@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { TransactionService } from '../services/transaction.service';
 import { Transaction, TransactionStatus } from '../entities/transaction.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -10,7 +20,9 @@ export class TransactionController {
   constructor(private transactionService: TransactionService) {}
 
   @Get()
-  async findAll(@Query('treasuryId') treasuryId?: string): Promise<Transaction[]> {
+  async findAll(
+    @Query('treasuryId') treasuryId?: string,
+  ): Promise<Transaction[]> {
     if (treasuryId) {
       return this.transactionService.findByTreasuryId(treasuryId);
     }
@@ -23,7 +35,10 @@ export class TransactionController {
   }
 
   @Post()
-  async create(@Body() transaction: Partial<Transaction>, @CurrentUser() user: any): Promise<Transaction> {
+  async create(
+    @Body() transaction: Partial<Transaction>,
+    @CurrentUser() user: any,
+  ): Promise<Transaction> {
     return this.transactionService.create(transaction, user.id);
   }
 
@@ -37,7 +52,10 @@ export class TransactionController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string, @CurrentUser() user: any): Promise<void> {
+  async delete(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ): Promise<void> {
     return this.transactionService.delete(id, user.id);
   }
 

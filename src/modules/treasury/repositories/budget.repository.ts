@@ -14,21 +14,21 @@ export class BudgetRepository {
     return this.budgetRepository.find();
   }
 
-  async findById(id: string): Promise<Budget> {
+  async findById(id: string): Promise<Budget | null> {
     return this.budgetRepository.findOne({ where: { id } });
   }
 
   async findByTreasuryId(treasuryId: string): Promise<Budget[]> {
-    return this.budgetRepository.find({ 
+    return this.budgetRepository.find({
       where: { treasuryId },
-      order: { startDate: 'DESC' }
+      order: { startDate: 'DESC' },
     });
   }
 
   async findByStatus(status: BudgetStatus): Promise<Budget[]> {
-    return this.budgetRepository.find({ 
+    return this.budgetRepository.find({
       where: { status },
-      order: { submissionDate: 'DESC' }
+      order: { submissionDate: 'DESC' },
     });
   }
 
@@ -37,7 +37,7 @@ export class BudgetRepository {
     return this.budgetRepository.save(newBudget);
   }
 
-  async update(id: string, budget: Partial<Budget>): Promise<Budget> {
+  async update(id: string, budget: Partial<Budget>): Promise<Budget | null> {
     await this.budgetRepository.update(id, budget);
     return this.findById(id);
   }

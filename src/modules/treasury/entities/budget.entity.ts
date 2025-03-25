@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { Treasury } from './treasury.entity';
 import { Allocation } from './allocation.entity';
 
@@ -26,7 +35,7 @@ export class Budget {
   @Column()
   treasuryId: string;
 
-  @ManyToOne(() => Treasury, treasury => treasury.budgets)
+  @ManyToOne(() => Treasury, (treasury) => treasury.budgets)
   @JoinColumn({ name: 'treasuryId' })
   treasury: Treasury;
 
@@ -64,7 +73,7 @@ export class Budget {
   @Column({ type: 'timestamp', nullable: true })
   approvalDate: Date;
 
-  @OneToMany(() => Allocation, allocation => allocation.budget)
+  @OneToMany(() => Allocation, (allocation) => allocation.budget)
   allocations: Allocation[];
 
   @CreateDateColumn()

@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Budget } from './budget.entity';
 
 export enum AllocationStatus {
@@ -23,7 +31,7 @@ export class Allocation {
   @Column()
   budgetId: string;
 
-  @ManyToOne(() => Budget, budget => budget.allocations)
+  @ManyToOne(() => Budget, (budget) => budget.allocations)
   @JoinColumn({ name: 'budgetId' })
   budget: Budget;
 

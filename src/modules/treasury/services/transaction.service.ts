@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { TransactionRepository } from '../repositories/transaction.repository';
 import { AssetRepository } from '../repositories/asset.repository';
-import { Transaction, TransactionType, TransactionStatus } from '../entities/transaction.entity';
+import {
+  Transaction,
+  TransactionType,
+  TransactionStatus,
+} from '../entities/transaction.entity';
 import { AuditLogService } from './audit-log.service';
 import { EntityType, ActionType } from '../entities/audit-log.entity';
 
@@ -17,7 +21,7 @@ export class TransactionService {
     return this.transactionRepository.findAll();
   }
 
-  async findById(id: string): Promise<Transaction> {
+  async findById(id: string): Promise<Transaction | null> {
     return this.transactionRepository.findById(id);
   }
 
@@ -25,14 +29,20 @@ export class TransactionService {
     return this.transactionRepository.findByTreasuryId(treasuryId);
   }
 
-  async create(transaction: Partial<Transaction>, userId: string): Promise<Transaction> {
+  async create(
+    transaction: Partial<Transaction>,
+    userId: string,
+  ): Promise<Transaction> {
     const newTransaction = await this.transactionRepository.create(transaction);
-    
+
     // If the transaction is already completed, update the asset
-    if (newTransaction.status === TransactionStatus.COMPLETED && newTransaction.assetId) {
+    if (
+      newTransaction.status === TransactionStatus.COMPLETED &&
+      newTransaction.assetId
+    ) {
       await this.updateAssetOnTransaction(newTransaction);
     }
-    
+
     // Log the creation action
     await this.auditLogService.logAction({
       treasuryId: newTransaction.treasuryId,
@@ -43,14 +53,21 @@ export class TransactionService {
       previousState: null,
       newState: newTransaction,
     });
-    
+
     return newTransaction;
   }
 
-  async update(id: string, transaction: Partial<Transaction>, userId: string): Promise<Transaction> {
+  async update(
+    id: string,
+    transaction: Partial<Transaction>,
+    userId: string,
+  ): Promise<Transaction> {
     const existingTransaction = await this.transactionRepository.findById(id);
-    const updatedTransaction = await this.transactionRepository.update(id, transaction);
-    
+    const updatedTransaction = await this.transactionRepository.update(
+      id,
+      transaction,
+    );
+
     // If the status changed to completed, update the asset
     if (
       transaction.status === TransactionStatus.COMPLETED &&
@@ -58,11 +75,11 @@ export class TransactionService {
       updatedTransaction.assetId
     ) {
       await this.updateAssetOnTransaction(updatedTransaction);
-      
+
       // Set the completedAt timestamp
       await this.transactionRepository.update(id, { completedAt: new Date() });
     }
-    
+
     // Log the update action
     await this.auditLogService.logAction({
       treasuryId: existingTransaction.treasuryId,
@@ -73,14 +90,14 @@ export class TransactionService {
       previousState: existingTransaction,
       newState: updatedTransaction,
     });
-    
+
     return this.transactionRepository.findById(id);
   }
 
   async delete(id: string, userId: string): Promise<void> {
     const existingTransaction = await this.transactionRepository.findById(id);
     await this.transactionRepository.delete(id);
-    
+
     // Log the delete action
     await this.auditLogService.logAction({
       treasuryId: existingTransaction.treasuryId,
@@ -93,13 +110,15 @@ export class TransactionService {
     });
   }
 
-  private async updateAssetOnTransaction(transaction: Transaction): Promise<void> {
+  private async updateAssetOnTransaction(
+    transaction: Transaction,
+  ): Promise<void> {
     if (!transaction.assetId) return;
-    
+
     const asset = await this.assetRepository.findById(transaction.assetId);
-    
+
     let newAmount = Number(asset.amount);
-    
+
     // Update the asset amount based on transaction type
     switch (transaction.type) {
       case TransactionType.DEPOSIT:
@@ -110,7 +129,7 @@ export class TransactionService {
         break;
       // Handle other transaction types as needed
     }
-    
+
     // Update the asset
     await this.assetRepository.update(asset.id, {
       amount: newAmount,

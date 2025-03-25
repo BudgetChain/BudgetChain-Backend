@@ -10,7 +10,7 @@ export class AuditLogService {
     return this.auditLogRepository.findAll();
   }
 
-  async findById(id: string): Promise<AuditLog> {
+  async findById(id: string): Promise<AuditLog | null> {
     return this.auditLogRepository.findById(id);
   }
 

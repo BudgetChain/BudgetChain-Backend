@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { Asset } from './asset.entity';
 import { Transaction } from './transaction.entity';
 import { Budget } from './budget.entity';
@@ -27,16 +34,16 @@ export class Treasury {
   @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
   riskScore: number;
 
-  @OneToMany(() => Asset, asset => asset.treasury)
+  @OneToMany(() => Asset, (asset) => asset.treasury)
   assets: Asset[];
 
-  @OneToMany(() => Transaction, transaction => transaction.treasury)
+  @OneToMany(() => Transaction, (transaction) => transaction.treasury)
   transactions: Transaction[];
 
-  @OneToMany(() => Budget, budget => budget.treasury)
+  @OneToMany(() => Budget, (budget) => budget.treasury)
   budgets: Budget[];
 
-  @OneToMany(() => RiskAssessment, riskAssessment => riskAssessment.treasury)
+  @OneToMany(() => RiskAssessment, (riskAssessment) => riskAssessment.treasury)
   riskAssessments: RiskAssessment[];
 
   @CreateDateColumn()

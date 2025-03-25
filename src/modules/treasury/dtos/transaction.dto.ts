@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsNumber, IsUUID, IsDate, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsUUID,
+  IsDate,
+  IsEnum,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export enum TransactionType {

@@ -14,7 +14,7 @@ export class TransactionRepository {
     return this.transactionRepository.find();
   }
 
-  async findById(id: string): Promise<Transaction> {
+  async findById(id: string): Promise<Transaction | null> {
     return this.transactionRepository.findOne({ where: { id } });
   }
 
@@ -27,7 +27,10 @@ export class TransactionRepository {
     return this.transactionRepository.save(newTransaction);
   }
 
-  async update(id: string, transaction: Partial<Transaction>): Promise<Transaction> {
+  async update(
+    id: string,
+    transaction: Partial<Transaction>,
+  ): Promise<Transaction | null> {
     await this.transactionRepository.update(id, transaction);
     return this.findById(id);
   }

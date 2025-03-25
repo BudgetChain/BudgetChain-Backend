@@ -15,7 +15,7 @@ export class BudgetService {
     return this.budgetRepository.findAll();
   }
 
-  async findById(id: string): Promise<Budget> {
+  async findById(id: string): Promise<Budget | null> {
     return this.budgetRepository.findById(id);
   }
 
@@ -29,7 +29,7 @@ export class BudgetService {
 
   async create(budget: Partial<Budget>, userId: string): Promise<Budget> {
     const newBudget = await this.budgetRepository.create(budget);
-    
+
     // Log the creation action
     await this.auditLogService.logAction({
       treasuryId: newBudget.treasuryId,
@@ -40,14 +40,18 @@ export class BudgetService {
       previousState: null,
       newState: newBudget,
     });
-    
+
     return newBudget;
   }
 
-  async update(id: string, budget: Partial<Budget>, userId: string): Promise<Budget> {
+  async update(
+    id: string,
+    budget: Partial<Budget>,
+    userId: string,
+  ): Promise<Budget> {
     const existingBudget = await this.budgetRepository.findById(id);
     const updatedBudget = await this.budgetRepository.update(id, budget);
-    
+
     // Log the update action
     await this.auditLogService.logAction({
       treasuryId: existingBudget.treasuryId,
@@ -58,14 +62,14 @@ export class BudgetService {
       previousState: existingBudget,
       newState: updatedBudget,
     });
-    
+
     return updatedBudget;
   }
 
   async delete(id: string, userId: string): Promise<void> {
     const existingBudget = await this.budgetRepository.findById(id);
     await this.budgetRepository.delete(id);
-    
+
     // Log the delete action
     await this.auditLogService.logAction({
       treasuryId: existingBudget.treasuryId,
@@ -80,13 +84,13 @@ export class BudgetService {
 
   async submitBudget(id: string, userId: string): Promise<Budget> {
     const budget = await this.budgetRepository.findById(id);
-    
+
     if (budget.status === BudgetStatus.DRAFT) {
       const updatedBudget = await this.budgetRepository.update(id, {
         status: BudgetStatus.SUBMITTED,
         submissionDate: new Date(),
       });
-      
+
       // Log the update action
       await this.auditLogService.logAction({
         treasuryId: budget.treasuryId,
@@ -97,22 +101,25 @@ export class BudgetService {
         previousState: budget,
         newState: updatedBudget,
       });
-      
+
       return updatedBudget;
     }
-    
+
     return budget;
   }
 
   async approveBudget(id: string, userId: string): Promise<Budget> {
     const budget = await this.budgetRepository.findById(id);
-    
-    if (budget.status === BudgetStatus.SUBMITTED || budget.status === BudgetStatus.UNDER_REVIEW) {
+
+    if (
+      budget.status === BudgetStatus.SUBMITTED ||
+      budget.status === BudgetStatus.UNDER_REVIEW
+    ) {
       const updatedBudget = await this.budgetRepository.update(id, {
         status: BudgetStatus.APPROVED,
         approvalDate: new Date(),
       });
-      
+
       // Log the update action
       await this.auditLogService.logAction({
         treasuryId: budget.treasuryId,
@@ -123,22 +130,25 @@ export class BudgetService {
         previousState: budget,
         newState: updatedBudget,
       });
-      
+
       return updatedBudget;
     }
-    
+
     return budget;
   }
 
   async rejectBudget(id: string, userId: string): Promise<Budget> {
     const budget = await this.budgetRepository.findById(id);
-    
-    if (budget.status === BudgetStatus.SUBMITTED || budget.status === BudgetStatus.UNDER_REVIEW) {
+
+    if (
+      budget.status === BudgetStatus.SUBMITTED ||
+      budget.status === BudgetStatus.UNDER_REVIEW
+    ) {
       const updatedBudget = await this.budgetRepository.update(id, {
         status: BudgetStatus.REJECTED,
         approvalDate: new Date(),
       });
-      
+
       // Log the update action
       await this.auditLogService.logAction({
         treasuryId: budget.treasuryId,
@@ -149,10 +159,10 @@ export class BudgetService {
         previousState: budget,
         newState: updatedBudget,
       });
-      
+
       return updatedBudget;
     }
-    
+
     return budget;
   }
 }

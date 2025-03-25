@@ -14,30 +14,38 @@ export class RiskAssessmentRepository {
     return this.riskAssessmentRepository.find();
   }
 
-  async findById(id: string): Promise<RiskAssessment> {
+  async findById(id: string): Promise<RiskAssessment | null> {
     return this.riskAssessmentRepository.findOne({ where: { id } });
   }
 
   async findByTreasuryId(treasuryId: string): Promise<RiskAssessment[]> {
-    return this.riskAssessmentRepository.find({ 
+    return this.riskAssessmentRepository.find({
       where: { treasuryId },
-      order: { timestamp: 'DESC' }
+      order: { timestamp: 'DESC' },
     });
   }
 
-  async findLatestByTreasuryId(treasuryId: string): Promise<RiskAssessment> {
+  async findLatestByTreasuryId(
+    treasuryId: string,
+  ): Promise<RiskAssessment | null> {
     return this.riskAssessmentRepository.findOne({
       where: { treasuryId },
-      order: { timestamp: 'DESC' }
+      order: { timestamp: 'DESC' },
     });
   }
 
-  async create(riskAssessment: Partial<RiskAssessment>): Promise<RiskAssessment> {
-    const newRiskAssessment = this.riskAssessmentRepository.create(riskAssessment);
+  async create(
+    riskAssessment: Partial<RiskAssessment>,
+  ): Promise<RiskAssessment> {
+    const newRiskAssessment =
+      this.riskAssessmentRepository.create(riskAssessment);
     return this.riskAssessmentRepository.save(newRiskAssessment);
   }
 
-  async update(id: string, riskAssessment: Partial<RiskAssessment>): Promise<RiskAssessment> {
+  async update(
+    id: string,
+    riskAssessment: Partial<RiskAssessment>,
+  ): Promise<RiskAssessment | null> {
     await this.riskAssessmentRepository.update(id, riskAssessment);
     return this.findById(id);
   }
