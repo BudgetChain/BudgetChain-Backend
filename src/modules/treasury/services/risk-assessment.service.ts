@@ -75,7 +75,7 @@ export class RiskAssessmentService {
     let weightedVolatility = 0;
 
     assets.forEach((asset) => {
-      const volatility = asset.riskMetrics?.volatility || 0.1; // Default volatility if not set
+      const volatility = (asset.riskMetrics?.volatility as number) ?? 0.1; // Default volatility if not set
       assetVolatility[asset.id] = volatility;
 
       const value = Number(asset.currentValue);
@@ -140,21 +140,23 @@ export class RiskAssessmentService {
 
     // Example recommendations based on portfolio composition and volatility
 
-    
     if (assets.length < 3) {
       recommendations.push(
-        'Consider diversifying your portfolio with more assets to reduce concentration risk.'
+        'Consider diversifying your portfolio with more assets to reduce concentration risk.',
       );
     }
 
     if (portfolioVolatility > 0.2) {
       recommendations.push(
-        'Your portfolio has high volatility. Consider adding stable assets to balance risk.'
+        'Your portfolio has high volatility. Consider adding stable assets to balance risk.',
       );
     }
 
     if (
-      assets.some(asset => asset.type === 'crypto' && asset.currentValue > 0)
+      assets.some(
+        (asset: { type?: string; currentValue?: number }) =>
+          asset.type === 'crypto' && (asset.currentValue ?? 0) > 0,
+      )
     ) {
       recommendations.push(
         'Cryptocurrency assets can be highly volatile. Monitor market conditions regularly.',
@@ -175,9 +177,11 @@ export class RiskAssessmentService {
     id: string,
     riskAssessment: Partial<RiskAssessment>,
     userId: string,
-  ): Promise<RiskAssessment> {
+  ): Promise<RiskAssessment | null> {
     const existingRiskAssessment =
       await this.riskAssessmentRepository.findById(id);
+
+    if (!existingRiskAssessment) throw new Error('No existing risk assessment');
     const updatedRiskAssessment = await this.riskAssessmentRepository.update(
       id,
       riskAssessment,
@@ -207,9 +211,11 @@ export class RiskAssessmentService {
     return updatedRiskAssessment;
   }
 
-  async delete(id: string, userId: string): Promise<void> {
+  async delete(id: string, userId: string): Promise<void | null> {
     const existingRiskAssessment =
       await this.riskAssessmentRepository.findById(id);
+
+    if (!existingRiskAssessment) throw new Error('no existing risk assessment');
     await this.riskAssessmentRepository.delete(id);
 
     // Log the delete action

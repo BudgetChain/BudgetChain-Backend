@@ -37,7 +37,11 @@ export class AllocationService {
 
     // Update the budget's allocated amount
     const budget = await this.budgetRepository.findById(newAllocation.budgetId);
-    const newAllocatedAmount = Number(budget?.allocatedAmount) + Number(newAllocation.amount);
+    if (!budget) {
+      throw new Error('Budget Not Found');
+    }
+    const newAllocatedAmount =
+      Number(budget.allocatedAmount) + Number(newAllocation.amount);
     await this.budgetRepository.update(budget.id, {
       allocatedAmount: newAllocatedAmount,
     });
@@ -67,11 +71,18 @@ export class AllocationService {
       allocation,
     );
 
+    if (!existingAllocation || !updatedAllocation) {
+      throw new Error('No existing/updated allocation');
+    }
+
     // If amount changed, update the budget's allocated amount
     if (allocation.amount && existingAllocation.amount !== allocation.amount) {
       const budget = await this.budgetRepository.findById(
         existingAllocation.budgetId,
       );
+
+      if (!budget) throw new Error('Budget not found');
+
       const amountDifference =
         Number(allocation.amount) - Number(existingAllocation.amount);
       const newAllocatedAmount =
@@ -85,6 +96,9 @@ export class AllocationService {
     const budget = await this.budgetRepository.findById(
       existingAllocation.budgetId,
     );
+
+    if (!budget) throw new Error('Budget not found');
+
     await this.auditLogService.logAction({
       treasuryId: budget.treasuryId,
       entityType: EntityType.ALLOCATION,
@@ -101,10 +115,15 @@ export class AllocationService {
   async delete(id: string, userId: string): Promise<void> {
     const existingAllocation = await this.allocationRepository.findById(id);
 
+    if (!existingAllocation) throw new Error('No existing Allocation');
+
     // Update the budget's allocated amount
     const budget = await this.budgetRepository.findById(
       existingAllocation.budgetId,
     );
+
+    if (!budget) throw new Error('No Budget Found');
+
     const newAllocatedAmount =
       Number(budget.allocatedAmount) - Number(existingAllocation.amount);
     await this.budgetRepository.update(budget.id, {
@@ -125,8 +144,13 @@ export class AllocationService {
     });
   }
 
-  async approveAllocation(id: string, userId: string): Promise<Allocation> {
+  async approveAllocation(
+    id: string,
+    userId: string,
+  ): Promise<Allocation | null> {
     const allocation = await this.allocationRepository.findById(id);
+
+    if (!allocation) throw new Error('Allocation not found');
 
     if (allocation.status === AllocationStatus.PENDING) {
       const updatedAllocation = await this.allocationRepository.update(id, {
@@ -139,6 +163,9 @@ export class AllocationService {
 
       // Log the update action
       const budget = await this.budgetRepository.findById(allocation.budgetId);
+
+      if (!budget) throw new Error('Budget not found');
+
       await this.auditLogService.logAction({
         treasuryId: budget.treasuryId,
         entityType: EntityType.ALLOCATION,
@@ -155,8 +182,13 @@ export class AllocationService {
     return allocation;
   }
 
-  async releaseAllocation(id: string, userId: string): Promise<Allocation> {
+  async releaseAllocation(
+    id: string,
+    userId: string,
+  ): Promise<Allocation | null> {
     const allocation = await this.allocationRepository.findById(id);
+
+    if (!allocation) throw new Error('No allocation found');
 
     if (allocation.status === AllocationStatus.APPROVED) {
       const updatedAllocation = await this.allocationRepository.update(id, {
@@ -166,6 +198,7 @@ export class AllocationService {
 
       // Log the update action
       const budget = await this.budgetRepository.findById(allocation.budgetId);
+      if (!budget) throw new Error('Budget not found');
       await this.auditLogService.logAction({
         treasuryId: budget.treasuryId,
         entityType: EntityType.ALLOCATION,

@@ -13,6 +13,7 @@ import { TransactionService } from '../services/transaction.service';
 import { Transaction, TransactionStatus } from '../entities/transaction.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { User } from '../../user/user.entity';
 
 @Controller('transactions')
 @UseGuards(JwtAuthGuard)
@@ -30,14 +31,14 @@ export class TransactionController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<Transaction> {
+  async findById(@Param('id') id: string): Promise<Transaction | null> {
     return this.transactionService.findById(id);
   }
 
   @Post()
   async create(
     @Body() transaction: Partial<Transaction>,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<Transaction> {
     return this.transactionService.create(transaction, user.id);
   }
@@ -46,15 +47,15 @@ export class TransactionController {
   async update(
     @Param('id') id: string,
     @Body() transaction: Partial<Transaction>,
-    @CurrentUser() user: any,
-  ): Promise<Transaction> {
+    @CurrentUser() user: User,
+  ): Promise<Transaction | null> {
     return this.transactionService.update(id, transaction, user.id);
   }
 
   @Delete(':id')
   async delete(
     @Param('id') id: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<void> {
     return this.transactionService.delete(id, user.id);
   }
@@ -63,8 +64,8 @@ export class TransactionController {
   async updateStatus(
     @Param('id') id: string,
     @Body('status') status: TransactionStatus,
-    @CurrentUser() user: any,
-  ): Promise<Transaction> {
+    @CurrentUser() user: User,
+  ): Promise<Transaction | null> {
     return this.transactionService.update(id, { status }, user.id);
   }
 }

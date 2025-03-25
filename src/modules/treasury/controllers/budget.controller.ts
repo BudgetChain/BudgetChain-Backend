@@ -15,6 +15,7 @@ import { Budget, BudgetStatus } from '../entities/budget.entity';
 import { Allocation } from '../entities/allocation.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { User } from '../../user/user.entity';
 
 @Controller('budgets')
 @UseGuards(JwtAuthGuard)
@@ -39,14 +40,14 @@ export class BudgetController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<Budget> {
+  async findById(@Param('id') id: string): Promise<Budget | null> {
     return this.budgetService.findById(id);
   }
 
   @Post()
   async create(
     @Body() budget: Partial<Budget>,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<Budget> {
     return this.budgetService.create(budget, user.id);
   }
@@ -55,15 +56,15 @@ export class BudgetController {
   async update(
     @Param('id') id: string,
     @Body() budget: Partial<Budget>,
-    @CurrentUser() user: any,
-  ): Promise<Budget> {
+    @CurrentUser() user: User,
+  ): Promise<Budget | null> {
     return this.budgetService.update(id, budget, user.id);
   }
 
   @Delete(':id')
   async delete(
     @Param('id') id: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<void> {
     return this.budgetService.delete(id, user.id);
   }
@@ -71,7 +72,7 @@ export class BudgetController {
   @Post(':id/submit')
   async submitBudget(
     @Param('id') id: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<Budget> {
     return this.budgetService.submitBudget(id, user.id);
   }
@@ -79,7 +80,7 @@ export class BudgetController {
   @Post(':id/approve')
   async approveBudget(
     @Param('id') id: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<Budget> {
     return this.budgetService.approveBudget(id, user.id);
   }
@@ -87,8 +88,8 @@ export class BudgetController {
   @Post(':id/reject')
   async rejectBudget(
     @Param('id') id: string,
-    @CurrentUser() user: any,
-  ): Promise<Budget> {
+    @CurrentUser() user: User,
+  ): Promise<Budget | null> {
     return this.budgetService.rejectBudget(id, user.id);
   }
 
@@ -101,8 +102,8 @@ export class BudgetController {
   async createAllocation(
     @Param('id') budgetId: string,
     @Body() allocation: Partial<Allocation>,
-    @CurrentUser() user: any,
-  ): Promise<Allocation> {
+    @CurrentUser() user: User,
+  ): Promise<Allocation | null> {
     allocation.budgetId = budgetId;
     return this.allocationService.create(allocation, user.id);
   }

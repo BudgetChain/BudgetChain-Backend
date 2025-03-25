@@ -13,6 +13,7 @@ import { AllocationService } from '../services/allocation.service';
 import { Allocation, AllocationStatus } from '../entities/allocation.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { User } from '../../user/user.entity';
 
 @Controller('allocations')
 @UseGuards(JwtAuthGuard)
@@ -34,15 +35,15 @@ export class AllocationController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<Allocation> {
+  async findById(@Param('id') id: string): Promise<Allocation | null> {
     return this.allocationService.findById(id);
   }
 
   @Post()
   async create(
     @Body() allocation: Partial<Allocation>,
-    @CurrentUser() user: any,
-  ): Promise<Allocation> {
+    @CurrentUser() user: User,
+  ): Promise<Allocation | null> {
     return this.allocationService.create(allocation, user.id);
   }
 
@@ -50,7 +51,7 @@ export class AllocationController {
   async update(
     @Param('id') id: string,
     @Body() allocation: Partial<Allocation>,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<Allocation> {
     return this.allocationService.update(id, allocation, user.id);
   }
@@ -58,7 +59,7 @@ export class AllocationController {
   @Delete(':id')
   async delete(
     @Param('id') id: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<void> {
     return this.allocationService.delete(id, user.id);
   }
@@ -66,16 +67,16 @@ export class AllocationController {
   @Post(':id/approve')
   async approveAllocation(
     @Param('id') id: string,
-    @CurrentUser() user: any,
-  ): Promise<Allocation> {
+    @CurrentUser() user: User,
+  ): Promise<Allocation | null> {
     return this.allocationService.approveAllocation(id, user.id);
   }
 
   @Post(':id/release')
   async releaseAllocation(
     @Param('id') id: string,
-    @CurrentUser() user: any,
-  ): Promise<Allocation> {
+    @CurrentUser() user: User,
+  ): Promise<Allocation | null> {
     return this.allocationService.releaseAllocation(id, user.id);
   }
 }

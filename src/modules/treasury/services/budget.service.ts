@@ -48,8 +48,9 @@ export class BudgetService {
     id: string,
     budget: Partial<Budget>,
     userId: string,
-  ): Promise<Budget> {
+  ): Promise<Budget | null> {
     const existingBudget = await this.budgetRepository.findById(id);
+    if (!existingBudget) throw new Error('No existing budget found');
     const updatedBudget = await this.budgetRepository.update(id, budget);
 
     // Log the update action
@@ -68,6 +69,7 @@ export class BudgetService {
 
   async delete(id: string, userId: string): Promise<void> {
     const existingBudget = await this.budgetRepository.findById(id);
+    if (!existingBudget) throw new Error('No existing budget found');
     await this.budgetRepository.delete(id);
 
     // Log the delete action
@@ -85,11 +87,15 @@ export class BudgetService {
   async submitBudget(id: string, userId: string): Promise<Budget> {
     const budget = await this.budgetRepository.findById(id);
 
+    if (!budget) throw new Error('No new budget found');
+
     if (budget.status === BudgetStatus.DRAFT) {
       const updatedBudget = await this.budgetRepository.update(id, {
         status: BudgetStatus.SUBMITTED,
         submissionDate: new Date(),
       });
+
+      if (!updatedBudget) throw new Error('No updated budget');
 
       // Log the update action
       await this.auditLogService.logAction({
@@ -108,8 +114,10 @@ export class BudgetService {
     return budget;
   }
 
-  async approveBudget(id: string, userId: string): Promise<Budget> {
+  async approveBudget(id: string, userId: string): Promise<Budget | null> {
     const budget = await this.budgetRepository.findById(id);
+
+    if (!budget) throw new Error('Budget not found');
 
     if (
       budget.status === BudgetStatus.SUBMITTED ||
@@ -137,8 +145,10 @@ export class BudgetService {
     return budget;
   }
 
-  async rejectBudget(id: string, userId: string): Promise<Budget> {
+  async rejectBudget(id: string, userId: string): Promise<Budget | null> {
     const budget = await this.budgetRepository.findById(id);
+
+    if (!budget) throw new Error('no budget found');
 
     if (
       budget.status === BudgetStatus.SUBMITTED ||

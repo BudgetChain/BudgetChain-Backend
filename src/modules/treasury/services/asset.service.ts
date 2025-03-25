@@ -35,6 +35,9 @@ export class AssetService {
     const treasury = await this.treasuryRepository.findById(
       newAsset.treasuryId,
     );
+
+    if (!treasury) throw new Error('Treasury not found');
+
     const newTotalBalance =
       Number(treasury.totalBalance) + Number(newAsset.currentValue);
     await this.treasuryRepository.update(treasury.id, {
@@ -59,8 +62,10 @@ export class AssetService {
     id: string,
     asset: Partial<Asset>,
     userId: string,
-  ): Promise<Asset> {
+  ): Promise<Asset | null> {
     const existingAsset = await this.assetRepository.findById(id);
+
+    if (!existingAsset) throw new Error('No existing asset');
 
     // Update the asset with the lastUpdated timestamp
     const updatedAsset = await this.assetRepository.update(id, {
@@ -76,6 +81,7 @@ export class AssetService {
       const treasury = await this.treasuryRepository.findById(
         existingAsset.treasuryId,
       );
+      if (!treasury) throw new Error('No Treasury');
       const valueDifference =
         Number(asset.currentValue) - Number(existingAsset.currentValue);
       const newTotalBalance = Number(treasury.totalBalance) + valueDifference;
@@ -100,11 +106,13 @@ export class AssetService {
 
   async delete(id: string, userId: string): Promise<void> {
     const existingAsset = await this.assetRepository.findById(id);
+    if (!existingAsset) throw new Error('No Existing Asset Found');
 
     // Update the treasury's total balance
     const treasury = await this.treasuryRepository.findById(
       existingAsset.treasuryId,
     );
+    if (!treasury) throw new Error('treasury not found');
     const newTotalBalance =
       Number(treasury.totalBalance) - Number(existingAsset.currentValue);
     await this.treasuryRepository.update(treasury.id, {
@@ -129,8 +137,9 @@ export class AssetService {
     id: string,
     currentValue: number,
     userId: string,
-  ): Promise<Asset> {
+  ): Promise<Asset | null> {
     const existingAsset = await this.assetRepository.findById(id);
+    if (!existingAsset) throw new Error('No existing asset found');
 
     // Update the asset with the new value and lastUpdated timestamp
     const updatedAsset = await this.assetRepository.update(id, {
@@ -142,6 +151,7 @@ export class AssetService {
     const treasury = await this.treasuryRepository.findById(
       existingAsset.treasuryId,
     );
+    if (!treasury) throw new Error('no treasury found');
     const valueDifference =
       Number(currentValue) - Number(existingAsset.currentValue);
     const newTotalBalance = Number(treasury.totalBalance) + valueDifference;

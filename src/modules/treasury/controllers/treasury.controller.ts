@@ -15,6 +15,7 @@ import { Treasury } from '../entities/treasury.entity';
 import { Asset } from '../entities/asset.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { User } from '../../user/user.entity';
 
 @Controller('treasuries')
 @UseGuards(JwtAuthGuard)
@@ -35,14 +36,14 @@ export class TreasuryController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<Treasury> {
+  async findById(@Param('id') id: string): Promise<Treasury | null> {
     return this.treasuryService.findById(id);
   }
 
   @Post()
   async create(
     @Body() treasury: Partial<Treasury>,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<Treasury> {
     return this.treasuryService.create(treasury, user.id);
   }
@@ -51,15 +52,15 @@ export class TreasuryController {
   async update(
     @Param('id') id: string,
     @Body() treasury: Partial<Treasury>,
-    @CurrentUser() user: any,
-  ): Promise<Treasury> {
+    @CurrentUser() user: User,
+  ): Promise<Treasury | null> {
     return this.treasuryService.update(id, treasury, user.id);
   }
 
   @Delete(':id')
   async delete(
     @Param('id') id: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<void> {
     return this.treasuryService.delete(id, user.id);
   }
@@ -81,7 +82,7 @@ export class TreasuryController {
   async createAsset(
     @Param('id') treasuryId: string,
     @Body() asset: Partial<Asset>,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<Asset> {
     asset.treasuryId = treasuryId;
     return this.assetService.create(asset, user.id);

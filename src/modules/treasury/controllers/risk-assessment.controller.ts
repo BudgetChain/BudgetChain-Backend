@@ -17,6 +17,7 @@ import {
 } from '../dtos/risk-assessment.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { User } from '../../user/user.entity';
 
 @Controller('risk-assessments')
 @UseGuards(JwtAuthGuard)
@@ -34,14 +35,14 @@ export class RiskAssessmentController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<RiskAssessment> {
+  async findById(@Param('id') id: string): Promise<RiskAssessment | null> {
     return this.riskAssessmentService.findById(id);
   }
 
   @Post()
   async create(
     @Body() createRiskAssessmentDto: CreateRiskAssessmentDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<RiskAssessment> {
     return this.riskAssessmentService.create(createRiskAssessmentDto, user.id);
   }
@@ -49,7 +50,7 @@ export class RiskAssessmentController {
   @Post('generate/:treasuryId')
   async generateRiskAssessment(
     @Param('treasuryId') treasuryId: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ): Promise<RiskAssessment> {
     return this.riskAssessmentService.generateRiskAssessment(
       treasuryId,
@@ -60,15 +61,15 @@ export class RiskAssessmentController {
   @Get('latest/:treasuryId')
   async getLatestRiskAssessment(
     @Param('treasuryId') treasuryId: string,
-  ): Promise<RiskAssessment> {
+  ): Promise<RiskAssessment | null> {
     return this.riskAssessmentService.findLatestByTreasuryId(treasuryId);
   }
 
   @Delete(':id')
   async delete(
     @Param('id') id: string,
-    @CurrentUser() user: any,
-  ): Promise<void> {
+    @CurrentUser() user: User,
+  ): Promise<void | null> {
     return this.riskAssessmentService.delete(id, user.id);
   }
 }
