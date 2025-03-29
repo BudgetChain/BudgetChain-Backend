@@ -1,13 +1,6 @@
-import { IsString, IsNotEmpty, IsArray } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class WalletLoginDto {
   @IsString()
-  @IsNotEmpty()
-  publicAddress: string;
-
-  @IsString()
-  @IsNotEmpty()
-  signature: string;
-
- 
+  walletAddress: string;
 }

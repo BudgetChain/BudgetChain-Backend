@@ -1,68 +1,60 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { UserService } from '../../user/user.service';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
-import { LoginDto } from '../dto/login.dto';
-import { WalletLoginDto } from '../dto/wallet-login.dto';
+import * as jwt from 'jsonwebtoken';
+import * as bcrypt from 'bcrypt';
+import { UserService } from 'src/modules/user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
-    private readonly jwtService: JwtService,
+    private configService: ConfigService,
+    private userService: UserService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<{ id: string; email: string; roles?: string[] } | null> {
     const user = await this.userService.findByEmail(email);
-    if (!user) return null;
-
-    const isValid = await bcrypt.compare(password, user.passwordHash);
-    return isValid ? user : null;
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+      return null;
+    }
+    return { id: user.id, email: user.email, roles: user.roles };
   }
 
-  async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+  async validateWallet(
+    walletAddress: string,
+  ): Promise<{ id: string; email: string; roles?: string[] } | null> {
+    const user = await this.userService.findByWallet(walletAddress);
+    if (!user) {
+      return null;
+    }
+    return { id: user.id, email: user.email, roles: user.roles };
+  }
+
+  generateToken(user: Partial<JwtPayload>): string {
+    // Validate that required fields are present
+    if (!user.sub || !user.email) {
+      throw new Error(
+        'Missing required fields (sub or email) for token generation',
+      );
+    }
 
     const payload: JwtPayload = {
-      sub: user.id,
+      sub: user.sub,
       email: user.email,
-      roles: user.roles,
+      roles: user.roles || [],
+      wallet: user.wallet || undefined,
     };
 
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
-  }
+    const secret = this.configService.get<string>('jwt.secret');
+    const expiresIn = this.configService.get<string>('jwt.expiresIn');
 
-  async walletLogin(walletLoginDto: WalletLoginDto) {
-    const user = await this.userService.findByWallet(walletLoginDto.publicAddress);
-    if (!user) throw new UnauthorizedException('Wallet not registered');
+    if (!secret) {
+      throw new Error('JWT_SECRET is not configured');
+    }
 
-    // Verify signature here (Starknet-specific logic)
-    const isValid = await this.verifyStarknetSignature(
-      walletLoginDto.publicAddress,
-      walletLoginDto.signature,
-    );
-    if (!isValid) throw new UnauthorizedException('Invalid signature');
-
-    const payload: JwtPayload = {
-      sub: user.id,
-      email: user.email,
-      roles: user.roles,
-    };
-
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
-  }
-
-  private async verifyStarknetSignature(
-    publicAddress: string,
-    signature: string,
-  ): Promise<boolean> {
-    // Implement actual Starknet verification
-    return true; // Placeholder
+    return jwt.sign(payload, secret, { expiresIn });
   }
 }

@@ -1,21 +1,44 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { Observable } from 'rxjs';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as jwt from 'jsonwebtoken';
+import { Request } from 'express';
+import { JwtPayload } from '../../modules/auth/interfaces/jwt-payload.interface';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    // Add custom logic here if needed (e.g., allow public routes)
-    return super.canActivate(context);
-  }
+export class JwtAuthGuard implements CanActivate {
+  constructor(private readonly configService: ConfigService) {}
 
-  handleRequest(err: any, user: any, info: any) {
-    // Customize error responses
-    if (err || !user) {
-      throw err || new Error('Invalid JWT');
+  canActivate(context: ExecutionContext): boolean {
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: JwtPayload }>();
+    const authHeader = request.headers.authorization;
+
+    if (
+      !authHeader ||
+      typeof authHeader !== 'string' ||
+      !authHeader.startsWith('Bearer ')
+    ) {
+      throw new UnauthorizedException('No token provided');
     }
-    return user;
+
+    const token = authHeader.split(' ')[1];
+    const secret = this.configService.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error('JWT_SECRET is not configured');
+    }
+
+    try {
+      const decoded = jwt.verify(token, secret) as JwtPayload;
+      request.user = decoded; // Attach the decoded payload to the request
+      return true;
+    } catch {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
   }
 }
