@@ -37,4 +37,18 @@ export class AuthController {
     await Promise.resolve(); // Added dummy await to satisfy ESLint rule
     return user;
   }
+
+  /** ✅ Added protected route */
+  @UseGuards(JwtAuthGuard)
+  @Get('protected-route')
+  async getProtectedRoute(
+    @CurrentUser() user: User,
+  ): Promise<{ message: string; user: User }> {
+    console.log('Protected Route Access:', user);
+
+    // Simulating an asynchronous operation (e.g., fetching user data from DB)
+    await Promise.resolve();
+
+    return { message: 'You have access!', user };
+  }
 }

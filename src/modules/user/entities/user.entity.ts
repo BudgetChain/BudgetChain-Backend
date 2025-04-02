@@ -11,7 +11,6 @@ import * as bcrypt from 'bcrypt';
 export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
-  MANAGER = 'manager',
 }
 
 export enum AuthProvider {

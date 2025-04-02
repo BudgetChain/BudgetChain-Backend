@@ -1,10 +1,6 @@
-import {
-  Injectable,
-  type CanActivate,
-  type ExecutionContext,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core'; // Use a regular import
-import type { UserRole } from '../../user/entities/user.entity';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { UserRole } from '../../user/entities/user.entity';
 import type { RequestWithUser } from '../types/auth.types';
 
 @Injectable()

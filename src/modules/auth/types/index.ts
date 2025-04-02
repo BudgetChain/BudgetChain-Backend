@@ -1,5 +1,4 @@
-// src/modules/auth/types/index.ts
-import { UserRole } from '../../user/enums/user-role.enum';
+import { UserRole } from '../../user/entities/user.entity';
 
 export type UserPayload = {
   id: string;

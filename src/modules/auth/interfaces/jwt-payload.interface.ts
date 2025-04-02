@@ -1,6 +1,10 @@
+import { UserRole } from 'src/modules/user/entities/user.entity';
+
 export interface JwtPayload {
-  sub: string; // User ID
-  email: string; // User email
-  roles?: string[]; // Optional roles
-  wallet?: string; // Optional wallet address
+  sub: string;
+  email: string | null;
+  roles: UserRole[];
+  wallet?: string;
+  iat?: number;
+  exp?: number;
 }
