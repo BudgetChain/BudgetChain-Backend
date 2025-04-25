@@ -8,7 +8,7 @@ import {
   NotFoundError,
   DatabaseError,
   ValidationError,
-  BusinessLogicError
+  BusinessLogicError,
 } from '../../../shared/erros/app-error';
 import BigNumber from 'bignumber.js';
 
@@ -19,23 +19,20 @@ export class TreasuryBudgetService {
     private budgetRepository: Repository<Budget>,
     @Inject(LoggingService)
     private logger: LoggingService,
-    private dataSource: DataSource,
+    private dataSource: DataSource
   ) {
     this.logger.setContext('TreasuryBudgetService');
     // Configure BigNumber for precision
     BigNumber.config({
       DECIMAL_PLACES: 18,
-      ROUNDING_MODE: BigNumber.ROUND_DOWN
+      ROUNDING_MODE: BigNumber.ROUND_DOWN,
     });
   }
 
   /**
    * Find all budgets
    */
-  async findAll(
-    status?: BudgetStatus,
-    ownerId?: string,
-  ): Promise<Budget[]> {
+  async findAll(status?: BudgetStatus, ownerId?: string): Promise<Budget[]> {
     try {
       const queryBuilder = this.budgetRepository.createQueryBuilder('budget');
 
@@ -54,8 +51,12 @@ export class TreasuryBudgetService {
       this.logger.debug(`Retrieved ${budgets.length} budgets`);
       return budgets;
     } catch (error) {
-      this.logger.error(`Error retrieving budgets: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to retrieve budgets: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error retrieving budgets: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to retrieve budgets: ${formatErrorMessage(error)}`
+      );
     }
   }
 
@@ -80,10 +81,10 @@ export class TreasuryBudgetService {
         throw error;
       }
       this.logger.error(
-        `Error finding budget by ID ${id}: ${formatErrorMessage(error)}`,
+        `Error finding budget by ID ${id}: ${formatErrorMessage(error)}`
       );
       throw new DatabaseError(
-        `Failed to find budget: ${formatErrorMessage(error)}`,
+        `Failed to find budget: ${formatErrorMessage(error)}`
       );
     }
   }
@@ -101,7 +102,9 @@ export class TreasuryBudgetService {
       if (budgetData.totalAmount) {
         const amount = new BigNumber(budgetData.totalAmount);
         if (amount.isNaN() || amount.isLessThan(0)) {
-          throw new ValidationError('Budget amount must be a non-negative number');
+          throw new ValidationError(
+            'Budget amount must be a non-negative number'
+          );
         }
       } else {
         budgetData.totalAmount = '0';
@@ -122,14 +125,18 @@ export class TreasuryBudgetService {
       const budget = this.budgetRepository.create(budgetData);
       const savedBudget = await this.budgetRepository.save(budget);
 
-      this.logger.log(`Created new budget: ${savedBudget.name} with status ${savedBudget.status}`);
+      this.logger.log(
+        `Created new budget: ${savedBudget.name} with status ${savedBudget.status}`
+      );
       return savedBudget;
     } catch (error) {
       if (error instanceof ValidationError) {
         throw error;
       }
       this.logger.error(`Error creating budget: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to create budget: ${formatErrorMessage(error)}`);
+      throw new DatabaseError(
+        `Failed to create budget: ${formatErrorMessage(error)}`
+      );
     }
   }
 
@@ -147,7 +154,7 @@ export class TreasuryBudgetService {
 
       // Validate status transitions
       if (budgetData.status && budget.status !== budgetData.status) {
-        await this.validateStatusTransition(budget, budgetData.status);
+        this.validateStatusTransition(budget, budgetData.status);
       }
 
       // If total amount is being updated, validate
@@ -156,14 +163,20 @@ export class TreasuryBudgetService {
         const allocatedAmount = new BigNumber(budget.allocatedAmount);
 
         if (newAmount.isLessThan(allocatedAmount)) {
-          throw new ValidationError('Total budget amount cannot be less than already allocated amount');
+          throw new ValidationError(
+            'Total budget amount cannot be less than already allocated amount'
+          );
         }
       }
 
       // If dates are updated, validate
       if (budgetData.startDate || budgetData.endDate) {
-        const startDate = budgetData.startDate ? new Date(budgetData.startDate) : budget.startDate;
-        const endDate = budgetData.endDate ? new Date(budgetData.endDate) : budget.endDate;
+        const startDate = budgetData.startDate
+          ? new Date(budgetData.startDate)
+          : budget.startDate;
+        const endDate = budgetData.endDate
+          ? new Date(budgetData.endDate)
+          : budget.endDate;
 
         if (startDate && endDate && startDate > endDate) {
           throw new ValidationError('Start date cannot be after end date');
@@ -176,15 +189,25 @@ export class TreasuryBudgetService {
       const updatedBudget = await queryRunner.manager.save(budget);
       await queryRunner.commitTransaction();
 
-      this.logger.log(`Updated budget: ${updatedBudget.name} with status ${updatedBudget.status}`);
+      this.logger.log(
+        `Updated budget: ${updatedBudget.name} with status ${updatedBudget.status}`
+      );
       return updatedBudget;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      if (error instanceof NotFoundError || error instanceof ValidationError || error instanceof BusinessLogicError) {
+      if (
+        error instanceof NotFoundError ||
+        error instanceof ValidationError ||
+        error instanceof BusinessLogicError
+      ) {
         throw error;
       }
-      this.logger.error(`Error updating budget ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to update budget: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error updating budget ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to update budget: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -216,7 +239,7 @@ export class TreasuryBudgetService {
       // First find the budget with lock
       const budget = await queryRunner.manager.findOne(Budget, {
         where: { id },
-        lock: { mode: 'pessimistic_write' }
+        lock: { mode: 'pessimistic_write' },
       });
 
       if (!budget) {
@@ -225,7 +248,9 @@ export class TreasuryBudgetService {
 
       // Check if budget is active
       if (budget.status !== BudgetStatus.ACTIVE) {
-        throw new BusinessLogicError(`Cannot update allocations for budget with status ${budget.status}`);
+        throw new BusinessLogicError(
+          `Cannot update allocations for budget with status ${budget.status}`
+        );
       }
 
       // Calculate new allocated amount
@@ -236,7 +261,9 @@ export class TreasuryBudgetService {
       // Validate allocated doesn't exceed total budget
       const totalBudget = new BigNumber(budget.totalAmount);
       if (newAllocated.isGreaterThan(totalBudget)) {
-        throw new ValidationError('Allocated amount cannot exceed total budget amount');
+        throw new ValidationError(
+          'Allocated amount cannot exceed total budget amount'
+        );
       }
 
       if (newAllocated.isLessThan(0)) {
@@ -249,15 +276,25 @@ export class TreasuryBudgetService {
       const updatedBudget = await queryRunner.manager.save(budget);
       await queryRunner.commitTransaction();
 
-      this.logger.log(`Updated allocated amount for budget ${id} to ${newAllocated.toString()}`);
+      this.logger.log(
+        `Updated allocated amount for budget ${id} to ${newAllocated.toString()}`
+      );
       return updatedBudget;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      if (error instanceof NotFoundError || error instanceof ValidationError || error instanceof BusinessLogicError) {
+      if (
+        error instanceof NotFoundError ||
+        error instanceof ValidationError ||
+        error instanceof BusinessLogicError
+      ) {
         throw error;
       }
-      this.logger.error(`Error updating budget allocated amount ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to update budget allocated amount: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error updating budget allocated amount ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to update budget allocated amount: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -275,7 +312,7 @@ export class TreasuryBudgetService {
       // First find the budget with lock
       const budget = await queryRunner.manager.findOne(Budget, {
         where: { id },
-        lock: { mode: 'pessimistic_write' }
+        lock: { mode: 'pessimistic_write' },
       });
 
       if (!budget) {
@@ -290,7 +327,9 @@ export class TreasuryBudgetService {
       // Validate spent doesn't exceed total budget
       const totalBudget = new BigNumber(budget.totalAmount);
       if (newSpent.isGreaterThan(totalBudget) && deltaAmount.isGreaterThan(0)) {
-        throw new ValidationError('Spent amount cannot exceed total budget amount');
+        throw new ValidationError(
+          'Spent amount cannot exceed total budget amount'
+        );
       }
 
       if (newSpent.isLessThan(0)) {
@@ -303,15 +342,25 @@ export class TreasuryBudgetService {
       const updatedBudget = await queryRunner.manager.save(budget);
       await queryRunner.commitTransaction();
 
-      this.logger.log(`Updated spent amount for budget ${id} to ${newSpent.toString()}`);
+      this.logger.log(
+        `Updated spent amount for budget ${id} to ${newSpent.toString()}`
+      );
       return updatedBudget;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      if (error instanceof NotFoundError || error instanceof ValidationError || error instanceof BusinessLogicError) {
+      if (
+        error instanceof NotFoundError ||
+        error instanceof ValidationError ||
+        error instanceof BusinessLogicError
+      ) {
         throw error;
       }
-      this.logger.error(`Error updating budget spent amount ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to update budget spent amount: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error updating budget spent amount ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to update budget spent amount: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -333,8 +382,12 @@ export class TreasuryBudgetService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      this.logger.error(`Error calculating available budget for ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to calculate available budget: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error calculating available budget for ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to calculate available budget: ${formatErrorMessage(error)}`
+      );
     }
   }
 
@@ -354,8 +407,12 @@ export class TreasuryBudgetService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      this.logger.error(`Error calculating remaining budget for ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to calculate remaining budget: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error calculating remaining budget for ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to calculate remaining budget: ${formatErrorMessage(error)}`
+      );
     }
   }
 
@@ -390,8 +447,12 @@ export class TreasuryBudgetService {
       return expiredBudgets.length;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      this.logger.error(`Error checking expired budgets: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to check expired budgets: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error checking expired budgets: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to check expired budgets: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -411,12 +472,16 @@ export class TreasuryBudgetService {
 
       // Only allow deletion of draft budgets
       if (budget.status !== BudgetStatus.DRAFT) {
-        throw new BusinessLogicError(`Cannot delete budget with status ${budget.status}`);
+        throw new BusinessLogicError(
+          `Cannot delete budget with status ${budget.status}`
+        );
       }
 
       // Check if budget has allocations
       if (budget.allocations && budget.allocations.length > 0) {
-        throw new BusinessLogicError('Cannot delete budget with existing allocations');
+        throw new BusinessLogicError(
+          'Cannot delete budget with existing allocations'
+        );
       }
 
       await queryRunner.manager.remove(budget);
@@ -425,11 +490,18 @@ export class TreasuryBudgetService {
       this.logger.log(`Deleted budget: ${budget.name}`);
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      if (error instanceof NotFoundError || error instanceof BusinessLogicError) {
+      if (
+        error instanceof NotFoundError ||
+        error instanceof BusinessLogicError
+      ) {
         throw error;
       }
-      this.logger.error(`Error deleting budget ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to delete budget: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error deleting budget ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to delete budget: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -438,7 +510,10 @@ export class TreasuryBudgetService {
   /**
    * Validate status transitions for budgets
    */
-  private async validateStatusTransition(budget: Budget, newStatus: BudgetStatus): Promise<void> {
+  private validateStatusTransition(
+    budget: Budget,
+    newStatus: BudgetStatus
+  ): void {
     const currentStatus = budget.status;
 
     // Define allowed transitions
@@ -451,7 +526,7 @@ export class TreasuryBudgetService {
 
     if (!allowedTransitions[currentStatus].includes(newStatus)) {
       throw new BusinessLogicError(
-        `Invalid budget status transition from ${currentStatus} to ${newStatus}`,
+        `Invalid budget status transition from ${currentStatus} to ${newStatus}`
       );
     }
   }

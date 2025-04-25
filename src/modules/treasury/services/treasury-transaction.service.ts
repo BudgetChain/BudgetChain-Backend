@@ -1,7 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { AssetTransaction, TransactionType, TransactionStatus } from '../entities/asset-transaction.entity';
+import {
+  AssetTransaction,
+  TransactionType,
+  TransactionStatus,
+} from '../entities/asset-transaction.entity';
 import { TreasuryAssetService } from './treasury-asset.service';
 import { LoggingService } from '../../../config/logging.service';
 import {
@@ -9,7 +13,7 @@ import {
   NotFoundError,
   DatabaseError,
   ValidationError,
-  BusinessLogicError
+  BusinessLogicError,
 } from '../../../shared/erros/app-error';
 import BigNumber from 'bignumber.js';
 import { StarknetService } from '../../blockchain/starknet.service';
@@ -23,13 +27,13 @@ export class TreasuryTransactionService {
     @Inject(LoggingService)
     private logger: LoggingService,
     private dataSource: DataSource,
-    private blockchainService: StarknetService,
+    private blockchainService: StarknetService
   ) {
     this.logger.setContext('TreasuryTransactionService');
     // Configure BigNumber for precision
     BigNumber.config({
       DECIMAL_PLACES: 18,
-      ROUNDING_MODE: BigNumber.ROUND_DOWN
+      ROUNDING_MODE: BigNumber.ROUND_DOWN,
     });
   }
 
@@ -41,10 +45,11 @@ export class TreasuryTransactionService {
     type?: TransactionType,
     status?: TransactionStatus,
     fromDate?: Date,
-    toDate?: Date,
+    toDate?: Date
   ): Promise<AssetTransaction[]> {
     try {
-      const queryBuilder = this.transactionRepository.createQueryBuilder('transaction');
+      const queryBuilder =
+        this.transactionRepository.createQueryBuilder('transaction');
 
       if (assetId) {
         queryBuilder.andWhere('transaction.assetId = :assetId', { assetId });
@@ -59,7 +64,9 @@ export class TreasuryTransactionService {
       }
 
       if (fromDate) {
-        queryBuilder.andWhere('transaction.createdAt >= :fromDate', { fromDate });
+        queryBuilder.andWhere('transaction.createdAt >= :fromDate', {
+          fromDate,
+        });
       }
 
       if (toDate) {
@@ -73,8 +80,12 @@ export class TreasuryTransactionService {
       this.logger.debug(`Retrieved ${transactions.length} transactions`);
       return transactions;
     } catch (error) {
-      this.logger.error(`Error retrieving transactions: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to retrieve transactions: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error retrieving transactions: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to retrieve transactions: ${formatErrorMessage(error)}`
+      );
     }
   }
 
@@ -99,10 +110,10 @@ export class TreasuryTransactionService {
         throw error;
       }
       this.logger.error(
-        `Error finding transaction by ID ${id}: ${formatErrorMessage(error)}`,
+        `Error finding transaction by ID ${id}: ${formatErrorMessage(error)}`
       );
       throw new DatabaseError(
-        `Failed to find transaction: ${formatErrorMessage(error)}`,
+        `Failed to find transaction: ${formatErrorMessage(error)}`
       );
     }
   }
@@ -115,7 +126,7 @@ export class TreasuryTransactionService {
     amount: string,
     fromAddress?: string,
     blockchainTxHash?: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, any>
   ): Promise<AssetTransaction> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -135,8 +146,12 @@ export class TreasuryTransactionService {
       if (blockchainTxHash) {
         try {
           await this.blockchainService.getTransaction(blockchainTxHash);
-        } catch (error) {
-          this.logger.warn(`Could not verify blockchain transaction ${blockchainTxHash}: ${formatErrorMessage(error)}`);
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : 'Unknown error';
+          this.logger.warn(
+            `Could not verify blockchain transaction ${blockchainTxHash}: ${errorMessage}`
+          );
           // Continue with the transaction but mark as pending
         }
       }
@@ -174,7 +189,7 @@ export class TreasuryTransactionService {
       await queryRunner.commitTransaction();
 
       this.logger.log(
-        `Recorded deposit of ${amount} ${asset.symbol} with status ${savedTransaction.status}`,
+        `Recorded deposit of ${amount} ${asset.symbol} with status ${savedTransaction.status}`
       );
       return savedTransaction;
     } catch (error) {
@@ -182,8 +197,12 @@ export class TreasuryTransactionService {
       if (error instanceof NotFoundError || error instanceof ValidationError) {
         throw error;
       }
-      this.logger.error(`Error recording deposit: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to record deposit: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error recording deposit: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to record deposit: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -197,7 +216,7 @@ export class TreasuryTransactionService {
     amount: string,
     toAddress: string,
     blockchainTxHash?: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, any>
   ): Promise<AssetTransaction> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -207,13 +226,15 @@ export class TreasuryTransactionService {
       // Validate the amount
       const withdrawalAmount = new BigNumber(amount);
       if (withdrawalAmount.isNaN() || withdrawalAmount.isLessThanOrEqualTo(0)) {
-        throw new ValidationError('Withdrawal amount must be a positive number');
+        throw new ValidationError(
+          'Withdrawal amount must be a positive number'
+        );
       }
 
       // Validate asset exists and has sufficient balance
       const asset = await queryRunner.manager.findOne(Asset, {
         where: { id: assetId },
-        lock: { mode: 'pessimistic_write' }
+        lock: { mode: 'pessimistic_write' },
       });
 
       if (!asset) {
@@ -228,7 +249,7 @@ export class TreasuryTransactionService {
       // Check if there's enough available balance
       if (availableBalance.isLessThan(withdrawalAmount)) {
         throw new BusinessLogicError(
-          `Insufficient available balance for withdrawal. Available: ${availableBalance.toString()}, Requested: ${withdrawalAmount.toString()}`,
+          `Insufficient available balance for withdrawal. Available: ${availableBalance.toString()}, Requested: ${withdrawalAmount.toString()}`
         );
       }
 
@@ -263,7 +284,7 @@ export class TreasuryTransactionService {
       await queryRunner.commitTransaction();
 
       this.logger.log(
-        `Recorded withdrawal of ${amount} ${asset.symbol} to ${toAddress}`,
+        `Recorded withdrawal of ${amount} ${asset.symbol} to ${toAddress}`
       );
       return savedTransaction;
     } catch (error) {
@@ -275,8 +296,12 @@ export class TreasuryTransactionService {
       ) {
         throw error;
       }
-      this.logger.error(`Error recording withdrawal: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to record withdrawal: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error recording withdrawal: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to record withdrawal: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -288,7 +313,7 @@ export class TreasuryTransactionService {
   async updateTransactionStatus(
     id: string,
     status: TransactionStatus,
-    blockNumber?: string,
+    blockNumber?: string
   ): Promise<AssetTransaction> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -299,7 +324,7 @@ export class TreasuryTransactionService {
       const transaction = await queryRunner.manager.findOne(AssetTransaction, {
         where: { id },
         relations: ['asset'],
-        lock: { mode: 'pessimistic_write' }
+        lock: { mode: 'pessimistic_write' },
       });
 
       if (!transaction) {
@@ -322,7 +347,7 @@ export class TreasuryTransactionService {
         // If this is a deposit or withdrawal that's being confirmed, update the asset balance
         if (
           (transaction.type === TransactionType.DEPOSIT ||
-           transaction.type === TransactionType.WITHDRAWAL) &&
+            transaction.type === TransactionType.WITHDRAWAL) &&
           transaction.blockchainTxHash
         ) {
           const asset = transaction.asset;
@@ -334,10 +359,13 @@ export class TreasuryTransactionService {
 
           if (transaction.type === TransactionType.DEPOSIT) {
             newBalance = currentBalance.plus(amount);
-          } else { // WITHDRAWAL
+          } else {
+            // WITHDRAWAL
             newBalance = currentBalance.minus(amount);
             if (newBalance.isLessThan(0)) {
-              throw new BusinessLogicError('Withdrawal would result in negative balance');
+              throw new BusinessLogicError(
+                'Withdrawal would result in negative balance'
+              );
             }
           }
 
@@ -364,10 +392,10 @@ export class TreasuryTransactionService {
         throw error;
       }
       this.logger.error(
-        `Error updating transaction status ${id}: ${formatErrorMessage(error)}`,
+        `Error updating transaction status ${id}: ${formatErrorMessage(error)}`
       );
       throw new DatabaseError(
-        `Failed to update transaction status: ${formatErrorMessage(error)}`,
+        `Failed to update transaction status: ${formatErrorMessage(error)}`
       );
     } finally {
       await queryRunner.release();
@@ -395,52 +423,91 @@ export class TreasuryTransactionService {
         try {
           // Skip if blockchainTxHash is undefined (shouldn't happen due to Not(IsNull()) above, but TypeScript needs this check)
           if (!transaction.blockchainTxHash) {
-            this.logger.warn(`Transaction ${transaction.id} has no blockchainTxHash but was returned in query`);
+            this.logger.warn(
+              `Transaction ${transaction.id} has no blockchainTxHash but was returned in query`
+            );
             continue;
           }
 
           // Check the transaction status on the blockchain
-          const txDetails = await this.blockchainService.getTransaction(transaction.blockchainTxHash);
+          const txDetails = await this.blockchainService.getTransaction(
+            transaction.blockchainTxHash
+          );
 
-          // Get the current block number for confirmation count
-          const currentBlockNumber = await this.blockchainService.getBlockNumber();
+          // Create a type-safe way to check properties on txDetails
+          type TxDetails = Record<string, unknown>;
+          const txData = txDetails as TxDetails;
 
-          // Extract transaction status and block number (implementation depends on the blockchain)
-          // This is a simplified example - actual implementation will depend on blockchain specifics
-          if (txDetails && txDetails['status'] === 'ACCEPTED_ON_L2') {
-            const blockNumber = txDetails['block_number'] ? txDetails['block_number'].toString() : null;
+          // Extract transaction status and block number with proper type checking
+          if (
+            txData &&
+            typeof txData.status === 'string' &&
+            txData.status === 'ACCEPTED_ON_L2'
+          ) {
+            // Extract the block number safely
+            let blockNumber: string | null = null;
+            if (
+              txData.block_number !== undefined &&
+              txData.block_number !== null
+            ) {
+              // Ensure proper string conversion
+              if (typeof txData.block_number === 'number') {
+                blockNumber = txData.block_number.toString();
+              } else if (typeof txData.block_number === 'string') {
+                blockNumber = txData.block_number;
+              } else {
+                // For other types, use JSON.stringify to get a safe representation
+                blockNumber = JSON.stringify(txData.block_number);
+              }
+            }
 
             // Update the transaction status
             await this.updateTransactionStatus(
               transaction.id,
               TransactionStatus.CONFIRMED,
-              blockNumber,
+              blockNumber || undefined
             );
 
             processedCount++;
-          } else if (txDetails && txDetails['status'] === 'REJECTED') {
+          } else if (
+            txData &&
+            typeof txData.status === 'string' &&
+            txData.status === 'REJECTED'
+          ) {
             // Transaction failed
             await this.updateTransactionStatus(
               transaction.id,
-              TransactionStatus.FAILED,
+              TransactionStatus.FAILED
             );
 
             processedCount++;
           }
           // If still pending, do nothing
         } catch (error) {
+          // Use proper error handling for the catch clause
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : 'Unknown error processing transaction';
+
           this.logger.error(
-            `Error processing pending transaction ${transaction.id}: ${formatErrorMessage(error)}`,
+            `Error processing pending transaction ${transaction.id}: ${errorMessage}`
           );
           // Continue with next transaction
         }
       }
 
-      this.logger.log(`Processed ${processedCount} of ${pendingTransactions.length} pending transactions`);
+      this.logger.log(
+        `Processed ${processedCount} of ${pendingTransactions.length} pending transactions`
+      );
       return processedCount;
     } catch (error) {
-      this.logger.error(`Error processing pending transactions: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to process pending transactions: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error processing pending transactions: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to process pending transactions: ${formatErrorMessage(error)}`
+      );
     }
   }
 
@@ -450,18 +517,23 @@ export class TreasuryTransactionService {
   async calculateTransactionVolume(
     assetId?: string,
     fromDate?: Date,
-    toDate?: Date,
+    toDate?: Date
   ): Promise<{ deposits: string; withdrawals: string }> {
     try {
       // Default to current month if dates not provided
       const now = new Date();
-      const startOfMonth = fromDate || new Date(now.getFullYear(), now.getMonth(), 1);
-      const endOfMonth = toDate || new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      const startOfMonth =
+        fromDate || new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth =
+        toDate ||
+        new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
       // Query for confirmed transactions in the period
       const queryBuilder = this.transactionRepository
         .createQueryBuilder('transaction')
-        .where('transaction.status = :status', { status: TransactionStatus.CONFIRMED })
+        .where('transaction.status = :status', {
+          status: TransactionStatus.CONFIRMED,
+        })
         .andWhere('transaction.createdAt BETWEEN :startDate AND :endDate', {
           startDate: startOfMonth,
           endDate: endOfMonth,
@@ -472,26 +544,54 @@ export class TreasuryTransactionService {
       }
 
       // Get deposits
-      const deposits = await queryBuilder
+      // Explicitly type the query result
+      interface QueryResult {
+        total: string | null;
+      }
+
+      // Define explicit type for the raw query result
+      type RawQueryResult = { total: string | null } | undefined;
+
+      const depositsQuery: RawQueryResult = await queryBuilder
         .clone()
         .andWhere('transaction.type = :type', { type: TransactionType.DEPOSIT })
         .select('SUM(transaction.amount)', 'total')
         .getRawOne();
 
+      // Create a safe object with the expected structure
+      const deposits: QueryResult = {
+        total: depositsQuery?.total ?? null,
+      };
+
       // Get withdrawals
-      const withdrawals = await queryBuilder
+      const withdrawalsQuery: RawQueryResult = await queryBuilder
         .clone()
-        .andWhere('transaction.type = :type', { type: TransactionType.WITHDRAWAL })
+        .andWhere('transaction.type = :type', {
+          type: TransactionType.WITHDRAWAL,
+        })
         .select('SUM(transaction.amount)', 'total')
         .getRawOne();
 
+      // Create a safe object with the expected structure
+      const withdrawals: QueryResult = {
+        total: withdrawalsQuery?.total ?? null,
+      };
+
+      // Handle null values safely
+      const depositsTotal = deposits.total ?? '0';
+      const withdrawalsTotal = withdrawals.total ?? '0';
+
       return {
-        deposits: deposits?.total || '0',
-        withdrawals: withdrawals?.total || '0',
+        deposits: depositsTotal,
+        withdrawals: withdrawalsTotal,
       };
     } catch (error) {
-      this.logger.error(`Error calculating transaction volume: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to calculate transaction volume: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error calculating transaction volume: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to calculate transaction volume: ${formatErrorMessage(error)}`
+      );
     }
   }
 }

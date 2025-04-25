@@ -57,7 +57,7 @@ export class Asset {
   @Column({ nullable: true, type: 'json' })
   metadata?: Record<string, any>;
 
-  @OneToMany(() => AssetTransaction, (transaction) => transaction.asset)
+  @OneToMany(() => AssetTransaction, transaction => transaction.asset)
   transactions: AssetTransaction[];
 
   @CreateDateColumn({ name: 'created_at' })

@@ -31,13 +31,14 @@ export class TreasuryController {
   @Post('deposit')
   @Roles(UserRole.ADMIN, UserRole.TREASURER)
   async processDeposit(
-    @Body() depositData: {
+    @Body()
+    depositData: {
       assetId: string;
       amount: string;
       fromAddress?: string;
       blockchainTxHash?: string;
       metadata?: Record<string, any>;
-    },
+    }
   ) {
     return this.treasuryService.processDeposit(
       depositData.assetId,
@@ -54,13 +55,14 @@ export class TreasuryController {
   @Post('withdrawal')
   @Roles(UserRole.ADMIN, UserRole.TREASURER)
   async processWithdrawal(
-    @Body() withdrawalData: {
+    @Body()
+    withdrawalData: {
       assetId: string;
       amount: string;
       toAddress: string;
       blockchainTxHash?: string;
       metadata?: Record<string, any>;
-    },
+    }
   ) {
     return this.treasuryService.processWithdrawal(
       withdrawalData.assetId,
@@ -80,7 +82,10 @@ export class TreasuryController {
     @Param('id') budgetId: string,
     @Body() data: { approverId: string }
   ) {
-    return this.treasuryService.processBudgetApproval(budgetId, data.approverId);
+    return this.treasuryService.processBudgetApproval(
+      budgetId,
+      data.approverId
+    );
   }
 
   /**
@@ -92,7 +97,10 @@ export class TreasuryController {
     @Param('id') allocationId: string,
     @Body() data: { approverId: string }
   ) {
-    return this.treasuryService.processAllocationApproval(allocationId, data.approverId);
+    return this.treasuryService.processAllocationApproval(
+      allocationId,
+      data.approverId
+    );
   }
 
   /**
@@ -101,12 +109,12 @@ export class TreasuryController {
   @Post('budget-with-allocation')
   @Roles(UserRole.ADMIN, UserRole.TREASURER)
   async createBudgetWithAllocation(
-    @Body() data: {
-      budget: any;
-      allocation: any
-    }
+    @Body() data: { budget: any; allocation: any }
   ) {
-    return this.treasuryService.createBudgetWithAllocation(data.budget, data.allocation);
+    return this.treasuryService.createBudgetWithAllocation(
+      data.budget,
+      data.allocation
+    );
   }
 
   /**
@@ -116,7 +124,7 @@ export class TreasuryController {
   @Roles(UserRole.ADMIN, UserRole.TREASURER, UserRole.AUDITOR)
   async generateAuditReport(
     @Query('fromDate') fromDate: string,
-    @Query('toDate') toDate: string,
+    @Query('toDate') toDate: string
   ) {
     return this.treasuryService.generateAuditReport(
       new Date(fromDate),

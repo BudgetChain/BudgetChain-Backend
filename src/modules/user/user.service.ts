@@ -15,7 +15,7 @@ export class UserService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @Inject(forwardRef(() => LoggingService)) // Use forwardRef for LoggingService
-    private logger: LoggingService,
+    private logger: LoggingService
   ) {
     this.logger.setContext('UserService');
   }
@@ -27,10 +27,10 @@ export class UserService {
       return users;
     } catch (error) {
       this.logger.error(
-        `Error retrieving all users: ${formatErrorMessage(error)}`,
+        `Error retrieving all users: ${formatErrorMessage(error)}`
       );
       throw new DatabaseError(
-        `Failed to retrieve users: ${formatErrorMessage(error)}`,
+        `Failed to retrieve users: ${formatErrorMessage(error)}`
       );
     }
   }
@@ -48,10 +48,10 @@ export class UserService {
         throw error;
       }
       this.logger.error(
-        `Error finding user by ID ${id}: ${formatErrorMessage(error)}`,
+        `Error finding user by ID ${id}: ${formatErrorMessage(error)}`
       );
       throw new DatabaseError(
-        `Failed to find user: ${formatErrorMessage(error)}`,
+        `Failed to find user: ${formatErrorMessage(error)}`
       );
     }
   }
@@ -62,10 +62,10 @@ export class UserService {
       return user;
     } catch (error) {
       this.logger.error(
-        `Error finding user by email ${email}: ${formatErrorMessage(error)}`,
+        `Error finding user by email ${email}: ${formatErrorMessage(error)}`
       );
       throw new DatabaseError(
-        `Failed to find user by email: ${formatErrorMessage(error)}`,
+        `Failed to find user by email: ${formatErrorMessage(error)}`
       );
     }
   }
@@ -82,10 +82,10 @@ export class UserService {
         throw error;
       }
       this.logger.error(
-        `Error updating role for user ${id}: ${formatErrorMessage(error)}`,
+        `Error updating role for user ${id}: ${formatErrorMessage(error)}`
       );
       throw new DatabaseError(
-        `Failed to update user role: ${formatErrorMessage(error)}`,
+        `Failed to update user role: ${formatErrorMessage(error)}`
       );
     }
   }
@@ -100,10 +100,10 @@ export class UserService {
         throw error;
       }
       this.logger.error(
-        `Error removing user ${id}: ${formatErrorMessage(error)}`,
+        `Error removing user ${id}: ${formatErrorMessage(error)}`
       );
       throw new DatabaseError(
-        `Failed to remove user: ${formatErrorMessage(error)}`,
+        `Failed to remove user: ${formatErrorMessage(error)}`
       );
     }
   }

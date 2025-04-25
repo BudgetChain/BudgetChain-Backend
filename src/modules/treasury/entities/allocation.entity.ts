@@ -31,7 +31,7 @@ export class Allocation {
   @Column({ type: 'text', nullable: true })
   description?: string;
 
-  @ManyToOne(() => Budget, (budget) => budget.allocations)
+  @ManyToOne(() => Budget, budget => budget.allocations)
   @JoinColumn({ name: 'budget_id' })
   budget: Budget;
 
@@ -73,10 +73,7 @@ export class Allocation {
   @Column({ type: 'json', nullable: true })
   metadata?: Record<string, any>;
 
-  @OneToMany(
-    () => AllocationTransaction,
-    (transaction) => transaction.allocation,
-  )
+  @OneToMany(() => AllocationTransaction, transaction => transaction.allocation)
   transactions: AllocationTransaction[];
 
   @CreateDateColumn({ name: 'created_at' })

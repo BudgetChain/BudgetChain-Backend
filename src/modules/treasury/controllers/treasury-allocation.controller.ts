@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  Query,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { TreasuryAllocationService } from '../services/treasury-allocation.service';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { UserRole } from '../../user/entities/user.entity';
@@ -17,9 +28,14 @@ export class TreasuryAllocationController {
     @Query('budgetId') budgetId?: string,
     @Query('assetId') assetId?: string,
     @Query('status') status?: AllocationStatus,
-    @Query('recipientId') recipientId?: string,
+    @Query('recipientId') recipientId?: string
   ) {
-    return this.allocationService.findAll(budgetId, assetId, status, recipientId);
+    return this.allocationService.findAll(
+      budgetId,
+      assetId,
+      status,
+      recipientId
+    );
   }
 
   /**
@@ -102,7 +118,8 @@ export class TreasuryAllocationController {
   @Roles(UserRole.ADMIN, UserRole.TREASURER)
   async processDisbursement(
     @Param('id') id: string,
-    @Body() data: {
+    @Body()
+    data: {
       amount: string;
       blockchainTxHash?: string;
       reference?: string;

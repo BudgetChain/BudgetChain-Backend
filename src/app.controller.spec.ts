@@ -42,14 +42,14 @@ describe('AppController', () => {
       expect(mockLoggingService.setContext).toHaveBeenCalledWith('AppService');
       expect(mockLoggingService.log).toHaveBeenCalledWith('Doing something...');
       expect(mockLoggingService.debug).toHaveBeenCalledWith(
-        'Debugging information...',
+        'Debugging information...'
       );
       expect(mockLoggingService.warn).toHaveBeenCalledWith(
-        'A warning occurred!',
+        'A warning occurred!'
       );
       expect(mockLoggingService.error).toHaveBeenCalledWith(
         'An error occurred!',
-        'Stack trace or error object',
+        'Stack trace or error object'
       );
     });
   });

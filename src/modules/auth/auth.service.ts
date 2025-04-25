@@ -33,7 +33,7 @@ export class AuthService {
     @Inject(forwardRef(() => StarknetService))
     private starknetService: StarknetService,
     @Inject(forwardRef(() => LoggingService))
-    private logger: LoggingService,
+    private logger: LoggingService
   ) {
     if (!this.jwtService) {
       throw new Error('JwtService is not provided');
@@ -51,7 +51,7 @@ export class AuthService {
 
   async validateUser(
     email: string,
-    password: string,
+    password: string
   ): Promise<UserWithoutPassword | null> {
     try {
       const user = await this.usersRepository.findOne({ where: { email } });
@@ -63,7 +63,7 @@ export class AuthService {
         try {
           const isPasswordValid = await this.comparePasswords(
             password,
-            user.password,
+            user.password
           );
           if (isPasswordValid) {
             // Remove password from the returned user object
@@ -75,7 +75,7 @@ export class AuthService {
           const errorMsg = formatErrorMessage(compareError);
           this.logger.error(`Error comparing passwords: ${errorMsg}`);
           throw new AuthenticationError(
-            `Error comparing passwords: ${errorMsg}`,
+            `Error comparing passwords: ${errorMsg}`
           );
         }
       }
@@ -91,14 +91,14 @@ export class AuthService {
 
   private async comparePasswords(
     plainPassword: string,
-    hashedPassword: string,
+    hashedPassword: string
   ): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
   }
 
   private async hashPassword(
     password: string,
-    saltRounds = 10,
+    saltRounds = 10
   ): Promise<string> {
     return bcrypt.hash(password, saltRounds);
   }
@@ -128,7 +128,7 @@ export class AuthService {
 
       if (existingUser) {
         this.logger.warn(
-          `Registration attempt with existing email: ${registerDto.email}`,
+          `Registration attempt with existing email: ${registerDto.email}`
         );
         throw new ConflictException('User with this email already exists');
       }
@@ -161,18 +161,18 @@ export class AuthService {
   }
 
   async authenticateWithStarknet(
-    starknetAuthDto: StarknetAuthDto,
+    starknetAuthDto: StarknetAuthDto
   ): Promise<TokenResponse> {
     try {
       const isValidSignature = this.starknetService.verifySignature(
         starknetAuthDto.walletAddress,
         starknetAuthDto.signature,
-        starknetAuthDto.message,
+        starknetAuthDto.message
       );
 
       if (!isValidSignature) {
         this.logger.warn(
-          `Invalid Starknet signature for wallet: ${starknetAuthDto.walletAddress}`,
+          `Invalid Starknet signature for wallet: ${starknetAuthDto.walletAddress}`
         );
         throw new UnauthorizedException('Invalid Starknet signature');
       }
@@ -189,11 +189,11 @@ export class AuthService {
         });
         user = await this.usersRepository.save(user);
         this.logger.log(
-          `New user created with Starknet wallet: ${starknetAuthDto.walletAddress}`,
+          `New user created with Starknet wallet: ${starknetAuthDto.walletAddress}`
         );
       } else {
         this.logger.log(
-          `User authenticated with Starknet wallet: ${starknetAuthDto.walletAddress}`,
+          `User authenticated with Starknet wallet: ${starknetAuthDto.walletAddress}`
         );
       }
 

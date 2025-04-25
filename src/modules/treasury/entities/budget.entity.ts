@@ -54,7 +54,7 @@ export class Budget {
   @Column({ type: 'json', nullable: true })
   metadata?: Record<string, any>;
 
-  @OneToMany(() => Allocation, (allocation) => allocation.budget)
+  @OneToMany(() => Allocation, allocation => allocation.budget)
   allocations: Allocation[];
 
   @CreateDateColumn({ name: 'created_at' })

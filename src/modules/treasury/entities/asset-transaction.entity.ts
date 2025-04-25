@@ -28,7 +28,7 @@ export class AssetTransaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Asset, (asset) => asset.transactions)
+  @ManyToOne(() => Asset, asset => asset.transactions)
   @JoinColumn({ name: 'asset_id' })
   asset: Asset;
 

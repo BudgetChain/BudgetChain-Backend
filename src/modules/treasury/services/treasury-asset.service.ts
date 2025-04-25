@@ -1,13 +1,13 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { Asset, AssetType } from '../entities/asset.entity';
+import { Asset } from '../entities/asset.entity';
 import { LoggingService } from '../../../config/logging.service';
 import {
   formatErrorMessage,
   NotFoundError,
   DatabaseError,
-  ValidationError
+  ValidationError,
 } from '../../../shared/erros/app-error';
 import BigNumber from 'bignumber.js';
 
@@ -18,13 +18,13 @@ export class TreasuryAssetService {
     private assetRepository: Repository<Asset>,
     @Inject(LoggingService)
     private logger: LoggingService,
-    private dataSource: DataSource,
+    private dataSource: DataSource
   ) {
     this.logger.setContext('TreasuryAssetService');
     // Configure BigNumber for precision
     BigNumber.config({
       DECIMAL_PLACES: 18,
-      ROUNDING_MODE: BigNumber.ROUND_DOWN
+      ROUNDING_MODE: BigNumber.ROUND_DOWN,
     });
   }
 
@@ -43,8 +43,12 @@ export class TreasuryAssetService {
       this.logger.debug(`Retrieved ${assets.length} assets`);
       return assets;
     } catch (error) {
-      this.logger.error(`Error retrieving assets: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to retrieve assets: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error retrieving assets: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to retrieve assets: ${formatErrorMessage(error)}`
+      );
     }
   }
 
@@ -63,22 +67,31 @@ export class TreasuryAssetService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      this.logger.error(`Error finding asset by ID ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to find asset: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error finding asset by ID ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to find asset: ${formatErrorMessage(error)}`
+      );
     }
   }
 
   /**
    * Get asset by symbol and contract address (for tokens)
    */
-  async findBySymbolAndContract(symbol: string, contractAddress?: string): Promise<Asset | null> {
+  async findBySymbolAndContract(
+    symbol: string,
+    contractAddress?: string
+  ): Promise<Asset | null> {
     try {
       const queryBuilder = this.assetRepository
         .createQueryBuilder('asset')
         .where('asset.symbol = :symbol', { symbol });
 
       if (contractAddress) {
-        queryBuilder.andWhere('asset.contractAddress = :contractAddress', { contractAddress });
+        queryBuilder.andWhere('asset.contractAddress = :contractAddress', {
+          contractAddress,
+        });
       } else {
         queryBuilder.andWhere('asset.contractAddress IS NULL');
       }
@@ -87,10 +100,10 @@ export class TreasuryAssetService {
       return asset;
     } catch (error) {
       this.logger.error(
-        `Error finding asset by symbol ${symbol}: ${formatErrorMessage(error)}`,
+        `Error finding asset by symbol ${symbol}: ${formatErrorMessage(error)}`
       );
       throw new DatabaseError(
-        `Failed to find asset by symbol: ${formatErrorMessage(error)}`,
+        `Failed to find asset by symbol: ${formatErrorMessage(error)}`
       );
     }
   }
@@ -113,21 +126,27 @@ export class TreasuryAssetService {
         );
 
         if (existingAsset) {
-          throw new ValidationError(`Asset ${assetData.symbol} with contract address ${assetData.contractAddress} already exists`);
+          throw new ValidationError(
+            `Asset ${assetData.symbol} with contract address ${assetData.contractAddress} already exists`
+          );
         }
       }
 
       const asset = this.assetRepository.create(assetData);
       const savedAsset = await this.assetRepository.save(asset);
 
-      this.logger.log(`Created new asset: ${savedAsset.name} (${savedAsset.symbol})`);
+      this.logger.log(
+        `Created new asset: ${savedAsset.name} (${savedAsset.symbol})`
+      );
       return savedAsset;
     } catch (error) {
       if (error instanceof ValidationError) {
         throw error;
       }
       this.logger.error(`Error creating asset: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to create asset: ${formatErrorMessage(error)}`);
+      throw new DatabaseError(
+        `Failed to create asset: ${formatErrorMessage(error)}`
+      );
     }
   }
 
@@ -149,15 +168,21 @@ export class TreasuryAssetService {
       const updatedAsset = await queryRunner.manager.save(Asset, asset);
       await queryRunner.commitTransaction();
 
-      this.logger.log(`Updated asset: ${updatedAsset.name} (${updatedAsset.symbol})`);
+      this.logger.log(
+        `Updated asset: ${updatedAsset.name} (${updatedAsset.symbol})`
+      );
       return updatedAsset;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       if (error instanceof NotFoundError) {
         throw error;
       }
-      this.logger.error(`Error updating asset ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to update asset: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error updating asset ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to update asset: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -175,7 +200,7 @@ export class TreasuryAssetService {
       // First, find the asset to ensure it exists
       const asset = await queryRunner.manager.findOne(Asset, {
         where: { id },
-        lock: { mode: 'pessimistic_write' }
+        lock: { mode: 'pessimistic_write' },
       });
 
       if (!asset) {
@@ -194,15 +219,21 @@ export class TreasuryAssetService {
       const updatedAsset = await queryRunner.manager.save(Asset, asset);
       await queryRunner.commitTransaction();
 
-      this.logger.log(`Updated balance for asset ${asset.symbol} to ${newBalance}`);
+      this.logger.log(
+        `Updated balance for asset ${asset.symbol} to ${newBalance}`
+      );
       return updatedAsset;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       if (error instanceof NotFoundError || error instanceof ValidationError) {
         throw error;
       }
-      this.logger.error(`Error updating asset balance ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to update asset balance: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error updating asset balance ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to update asset balance: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -220,7 +251,7 @@ export class TreasuryAssetService {
       // First, find the asset to ensure it exists
       const asset = await queryRunner.manager.findOne(Asset, {
         where: { id },
-        lock: { mode: 'pessimistic_write' }
+        lock: { mode: 'pessimistic_write' },
       });
 
       if (!asset) {
@@ -235,7 +266,9 @@ export class TreasuryAssetService {
       // Validate allocated balance doesn't exceed total balance
       const totalBalance = new BigNumber(asset.balance);
       if (newAllocated.isGreaterThan(totalBalance)) {
-        throw new ValidationError('Allocated amount cannot exceed total balance');
+        throw new ValidationError(
+          'Allocated amount cannot exceed total balance'
+        );
       }
 
       if (newAllocated.isLessThan(0)) {
@@ -248,15 +281,21 @@ export class TreasuryAssetService {
       const updatedAsset = await queryRunner.manager.save(Asset, asset);
       await queryRunner.commitTransaction();
 
-      this.logger.log(`Updated allocated balance for asset ${asset.symbol} to ${newAllocated.toString()}`);
+      this.logger.log(
+        `Updated allocated balance for asset ${asset.symbol} to ${newAllocated.toString()}`
+      );
       return updatedAsset;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       if (error instanceof NotFoundError || error instanceof ValidationError) {
         throw error;
       }
-      this.logger.error(`Error updating asset allocated balance ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to update asset allocated balance: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error updating asset allocated balance ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to update asset allocated balance: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -278,8 +317,12 @@ export class TreasuryAssetService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      this.logger.error(`Error calculating available balance for asset ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to calculate available balance: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error calculating available balance for asset ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to calculate available balance: ${formatErrorMessage(error)}`
+      );
     }
   }
 
@@ -307,8 +350,12 @@ export class TreasuryAssetService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      this.logger.error(`Error deleting asset ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to delete asset: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error deleting asset ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to delete asset: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -318,7 +365,10 @@ export class TreasuryAssetService {
    * Calculate total treasury value across all assets
    * Note: This would need a price feed integration for accurate results
    */
-  async calculateTreasuryValue(): Promise<{ totalValue: string; assetValues: { symbol: string; value: string }[] }> {
+  async calculateTreasuryValue(): Promise<{
+    totalValue: string;
+    assetValues: { symbol: string; value: string }[];
+  }> {
     try {
       // This is a placeholder for actual implementation
       // Would need price feed integration to calculate actual values
@@ -329,12 +379,16 @@ export class TreasuryAssetService {
         totalValue: '0',
         assetValues: assets.map(asset => ({
           symbol: asset.symbol,
-          value: asset.balance
-        }))
+          value: asset.balance,
+        })),
       };
     } catch (error) {
-      this.logger.error(`Error calculating treasury value: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to calculate treasury value: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error calculating treasury value: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to calculate treasury value: ${formatErrorMessage(error)}`
+      );
     }
   }
 }

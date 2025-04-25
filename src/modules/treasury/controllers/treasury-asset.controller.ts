@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  Query,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { TreasuryAssetService } from '../services/treasury-asset.service';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { UserRole } from '../../user/entities/user.entity';
@@ -41,10 +52,7 @@ export class TreasuryAssetController {
    */
   @Put(':id')
   @Roles(UserRole.ADMIN, UserRole.TREASURER)
-  async update(
-    @Param('id') id: string,
-    @Body() assetData: Partial<Asset>
-  ) {
+  async update(@Param('id') id: string, @Body() assetData: Partial<Asset>) {
     return this.assetService.update(id, assetData);
   }
 

@@ -1,12 +1,26 @@
-import { Controller, Get, Post, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { TreasuryTransactionService } from '../services/treasury-transaction.service';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { UserRole } from '../../user/entities/user.entity';
-import { TransactionStatus, TransactionType } from '../entities/asset-transaction.entity';
+import {
+  TransactionStatus,
+  TransactionType,
+} from '../entities/asset-transaction.entity';
 
 @Controller('treasury/transactions')
 export class TreasuryTransactionController {
-  constructor(private readonly transactionService: TreasuryTransactionService) {}
+  constructor(
+    private readonly transactionService: TreasuryTransactionService
+  ) {}
 
   /**
    * Get all transactions with optional filtering
@@ -18,9 +32,15 @@ export class TreasuryTransactionController {
     @Query('type') type?: TransactionType,
     @Query('status') status?: TransactionStatus,
     @Query('fromDate') fromDate?: Date,
-    @Query('toDate') toDate?: Date,
+    @Query('toDate') toDate?: Date
   ) {
-    return this.transactionService.findAll(assetId, type, status, fromDate, toDate);
+    return this.transactionService.findAll(
+      assetId,
+      type,
+      status,
+      fromDate,
+      toDate
+    );
   }
 
   /**
@@ -39,7 +59,8 @@ export class TreasuryTransactionController {
   @Roles(UserRole.ADMIN, UserRole.TREASURER)
   @HttpCode(HttpStatus.CREATED)
   async recordDeposit(
-    @Body() data: {
+    @Body()
+    data: {
       assetId: string;
       amount: string;
       fromAddress?: string;
@@ -63,7 +84,8 @@ export class TreasuryTransactionController {
   @Roles(UserRole.ADMIN, UserRole.TREASURER)
   @HttpCode(HttpStatus.CREATED)
   async recordWithdrawal(
-    @Body() data: {
+    @Body()
+    data: {
       assetId: string;
       amount: string;
       toAddress: string;
@@ -87,7 +109,8 @@ export class TreasuryTransactionController {
   @Roles(UserRole.ADMIN, UserRole.TREASURER)
   async updateTransactionStatus(
     @Param('id') id: string,
-    @Body() data: {
+    @Body()
+    data: {
       status: TransactionStatus;
       blockNumber?: string;
     }
@@ -116,8 +139,12 @@ export class TreasuryTransactionController {
   async calculateTransactionVolume(
     @Query('assetId') assetId?: string,
     @Query('fromDate') fromDate?: Date,
-    @Query('toDate') toDate?: Date,
+    @Query('toDate') toDate?: Date
   ) {
-    return this.transactionService.calculateTransactionVolume(assetId, fromDate, toDate);
+    return this.transactionService.calculateTransactionVolume(
+      assetId,
+      fromDate,
+      toDate
+    );
   }
 }

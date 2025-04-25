@@ -21,7 +21,7 @@ export class AllocationTransaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Allocation, (allocation) => allocation.transactions)
+  @ManyToOne(() => Allocation, allocation => allocation.transactions)
   @JoinColumn({ name: 'allocation_id' })
   allocation: Allocation;
 

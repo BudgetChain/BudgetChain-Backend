@@ -2,7 +2,10 @@ import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Allocation, AllocationStatus } from '../entities/allocation.entity';
-import { AllocationTransaction, AllocationTransactionType } from '../entities/allocation-transaction.entity';
+import {
+  AllocationTransaction,
+  AllocationTransactionType,
+} from '../entities/allocation-transaction.entity';
 import { TreasuryAssetService } from './treasury-asset.service';
 import { TreasuryBudgetService } from './treasury-budget.service';
 import { LoggingService } from '../../../config/logging.service';
@@ -11,7 +14,7 @@ import {
   NotFoundError,
   DatabaseError,
   ValidationError,
-  BusinessLogicError
+  BusinessLogicError,
 } from '../../../shared/erros/app-error';
 import BigNumber from 'bignumber.js';
 
@@ -26,13 +29,13 @@ export class TreasuryAllocationService {
     private budgetService: TreasuryBudgetService,
     @Inject(LoggingService)
     private logger: LoggingService,
-    private dataSource: DataSource,
+    private dataSource: DataSource
   ) {
     this.logger.setContext('TreasuryAllocationService');
     // Configure BigNumber for precision
     BigNumber.config({
       DECIMAL_PLACES: 18,
-      ROUNDING_MODE: BigNumber.ROUND_DOWN
+      ROUNDING_MODE: BigNumber.ROUND_DOWN,
     });
   }
 
@@ -43,10 +46,11 @@ export class TreasuryAllocationService {
     budgetId?: string,
     assetId?: string,
     status?: AllocationStatus,
-    recipientId?: string,
+    recipientId?: string
   ): Promise<Allocation[]> {
     try {
-      const queryBuilder = this.allocationRepository.createQueryBuilder('allocation');
+      const queryBuilder =
+        this.allocationRepository.createQueryBuilder('allocation');
 
       if (budgetId) {
         queryBuilder.andWhere('allocation.budgetId = :budgetId', { budgetId });
@@ -61,7 +65,9 @@ export class TreasuryAllocationService {
       }
 
       if (recipientId) {
-        queryBuilder.andWhere('allocation.recipientId = :recipientId', { recipientId });
+        queryBuilder.andWhere('allocation.recipientId = :recipientId', {
+          recipientId,
+        });
       }
 
       queryBuilder.leftJoinAndSelect('allocation.budget', 'budget');
@@ -73,8 +79,12 @@ export class TreasuryAllocationService {
       this.logger.debug(`Retrieved ${allocations.length} allocations`);
       return allocations;
     } catch (error) {
-      this.logger.error(`Error retrieving allocations: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to retrieve allocations: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error retrieving allocations: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to retrieve allocations: ${formatErrorMessage(error)}`
+      );
     }
   }
 
@@ -99,10 +109,10 @@ export class TreasuryAllocationService {
         throw error;
       }
       this.logger.error(
-        `Error finding allocation by ID ${id}: ${formatErrorMessage(error)}`,
+        `Error finding allocation by ID ${id}: ${formatErrorMessage(error)}`
       );
       throw new DatabaseError(
-        `Failed to find allocation: ${formatErrorMessage(error)}`,
+        `Failed to find allocation: ${formatErrorMessage(error)}`
       );
     }
   }
@@ -136,23 +146,33 @@ export class TreasuryAllocationService {
       // Validate amount
       const amount = new BigNumber(allocationData.amount);
       if (amount.isNaN() || amount.isLessThanOrEqualTo(0)) {
-        throw new ValidationError('Allocation amount must be a positive number');
+        throw new ValidationError(
+          'Allocation amount must be a positive number'
+        );
       }
 
       // Verify budget exists and has sufficient available funds
-      const budget = await this.budgetService.findById(allocationData.budgetId);
-      const availableBudget = await this.budgetService.getAvailableBudget(allocationData.budgetId);
+      await this.budgetService.findById(allocationData.budgetId);
+      const availableBudget = await this.budgetService.getAvailableBudget(
+        allocationData.budgetId
+      );
 
       if (new BigNumber(availableBudget).isLessThan(amount)) {
-        throw new BusinessLogicError(`Insufficient available budget. Available: ${availableBudget}, Requested: ${amount.toString()}`);
+        throw new BusinessLogicError(
+          `Insufficient available budget. Available: ${availableBudget}, Requested: ${amount.toString()}`
+        );
       }
 
       // Verify asset exists
-      const asset = await this.assetService.findById(allocationData.assetId);
-      const availableAssetBalance = await this.assetService.getAvailableBalance(allocationData.assetId);
+      await this.assetService.findById(allocationData.assetId);
+      const availableAssetBalance = await this.assetService.getAvailableBalance(
+        allocationData.assetId
+      );
 
       if (new BigNumber(availableAssetBalance).isLessThan(amount)) {
-        throw new BusinessLogicError(`Insufficient available asset balance. Available: ${availableAssetBalance}, Requested: ${amount.toString()}`);
+        throw new BusinessLogicError(
+          `Insufficient available asset balance. Available: ${availableAssetBalance}, Requested: ${amount.toString()}`
+        );
       }
 
       // Set default values
@@ -165,10 +185,16 @@ export class TreasuryAllocationService {
 
       // Update budget allocated amount if approved
       if (savedAllocation.status === AllocationStatus.APPROVED) {
-        await this.budgetService.updateAllocatedAmount(savedAllocation.budgetId, savedAllocation.amount);
+        await this.budgetService.updateAllocatedAmount(
+          savedAllocation.budgetId,
+          savedAllocation.amount
+        );
 
         // Update asset allocated balance
-        await this.assetService.updateAllocatedBalance(savedAllocation.assetId, savedAllocation.amount);
+        await this.assetService.updateAllocatedBalance(
+          savedAllocation.assetId,
+          savedAllocation.amount
+        );
 
         // Record allocation transaction
         await this.recordAllocationTransaction(
@@ -181,7 +207,9 @@ export class TreasuryAllocationService {
 
       await queryRunner.commitTransaction();
 
-      this.logger.log(`Created new allocation: ${savedAllocation.title} with status ${savedAllocation.status}`);
+      this.logger.log(
+        `Created new allocation: ${savedAllocation.title} with status ${savedAllocation.status}`
+      );
       return savedAllocation;
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -192,8 +220,12 @@ export class TreasuryAllocationService {
       ) {
         throw error;
       }
-      this.logger.error(`Error creating allocation: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to create allocation: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error creating allocation: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to create allocation: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -202,7 +234,10 @@ export class TreasuryAllocationService {
   /**
    * Update an existing allocation
    */
-  async update(id: string, allocationData: Partial<Allocation>): Promise<Allocation> {
+  async update(
+    id: string,
+    allocationData: Partial<Allocation>
+  ): Promise<Allocation> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -212,14 +247,26 @@ export class TreasuryAllocationService {
       const allocation = await this.findById(id);
 
       // Check if status is being changed
-      if (allocationData.status !== undefined && allocation.status !== allocationData.status) {
-        await this.validateStatusTransition(allocation, allocationData.status);
+      if (
+        allocationData.status !== undefined &&
+        allocation.status !== allocationData.status
+      ) {
+        this.validateStatusTransition(allocation, allocationData.status);
 
         // Handle status change
-        if (allocationData.status === AllocationStatus.APPROVED && allocation.status === AllocationStatus.PENDING) {
+        if (
+          allocationData.status === AllocationStatus.APPROVED &&
+          allocation.status === AllocationStatus.PENDING
+        ) {
           // Allocate funds
-          await this.budgetService.updateAllocatedAmount(allocation.budgetId, allocation.amount);
-          await this.assetService.updateAllocatedBalance(allocation.assetId, allocation.amount);
+          await this.budgetService.updateAllocatedAmount(
+            allocation.budgetId,
+            allocation.amount
+          );
+          await this.assetService.updateAllocatedBalance(
+            allocation.assetId,
+            allocation.amount
+          );
 
           // Record allocation transaction
           await this.recordAllocationTransaction(
@@ -232,19 +279,31 @@ export class TreasuryAllocationService {
 
           allocation.approvedAt = new Date();
           allocation.approvedBy = allocationData.approvedBy;
-        }
-        else if (allocationData.status === AllocationStatus.REJECTED && allocation.status === AllocationStatus.PENDING) {
+        } else if (
+          allocationData.status === AllocationStatus.REJECTED &&
+          allocation.status === AllocationStatus.PENDING
+        ) {
           // No funds were allocated, just update status
-        }
-        else if (allocationData.status === AllocationStatus.CANCELLED &&
-                (allocation.status === AllocationStatus.APPROVED || allocation.status === AllocationStatus.PENDING)) {
+        } else if (
+          allocationData.status === AllocationStatus.CANCELLED &&
+          (allocation.status === AllocationStatus.APPROVED ||
+            allocation.status === AllocationStatus.PENDING)
+        ) {
           if (allocation.status === AllocationStatus.APPROVED) {
             // Release allocated funds
-            const amountToRelease = new BigNumber(allocation.amount).minus(allocation.spentAmount).toString();
+            const amountToRelease = new BigNumber(allocation.amount)
+              .minus(allocation.spentAmount)
+              .toString();
 
             if (new BigNumber(amountToRelease).isGreaterThan(0)) {
-              await this.budgetService.updateAllocatedAmount(allocation.budgetId, `-${amountToRelease}`);
-              await this.assetService.updateAllocatedBalance(allocation.assetId, `-${amountToRelease}`);
+              await this.budgetService.updateAllocatedAmount(
+                allocation.budgetId,
+                `-${amountToRelease}`
+              );
+              await this.assetService.updateAllocatedBalance(
+                allocation.assetId,
+                `-${amountToRelease}`
+              );
 
               // Record cancellation transaction
               await this.recordAllocationTransaction(
@@ -255,18 +314,28 @@ export class TreasuryAllocationService {
               );
             }
           }
-        }
-        else if (allocationData.status === AllocationStatus.COMPLETED && allocation.status === AllocationStatus.APPROVED) {
+        } else if (
+          allocationData.status === AllocationStatus.COMPLETED &&
+          allocation.status === AllocationStatus.APPROVED
+        ) {
           // Check if all funds are spent
           const allocatedAmount = new BigNumber(allocation.amount);
           const spentAmount = new BigNumber(allocation.spentAmount);
 
           if (allocatedAmount.isGreaterThan(spentAmount)) {
             // Return unspent funds
-            const amountToReturn = allocatedAmount.minus(spentAmount).toString();
+            const amountToReturn = allocatedAmount
+              .minus(spentAmount)
+              .toString();
 
-            await this.budgetService.updateAllocatedAmount(allocation.budgetId, `-${amountToReturn}`);
-            await this.assetService.updateAllocatedBalance(allocation.assetId, `-${amountToReturn}`);
+            await this.budgetService.updateAllocatedAmount(
+              allocation.budgetId,
+              `-${amountToReturn}`
+            );
+            await this.assetService.updateAllocatedBalance(
+              allocation.assetId,
+              `-${amountToReturn}`
+            );
 
             // Record refund transaction
             await this.recordAllocationTransaction(
@@ -285,7 +354,9 @@ export class TreasuryAllocationService {
       const updatedAllocation = await queryRunner.manager.save(allocation);
       await queryRunner.commitTransaction();
 
-      this.logger.log(`Updated allocation: ${updatedAllocation.title} with status ${updatedAllocation.status}`);
+      this.logger.log(
+        `Updated allocation: ${updatedAllocation.title} with status ${updatedAllocation.status}`
+      );
       return updatedAllocation;
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -296,8 +367,12 @@ export class TreasuryAllocationService {
       ) {
         throw error;
       }
-      this.logger.error(`Error updating allocation ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to update allocation: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error updating allocation ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to update allocation: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -306,7 +381,10 @@ export class TreasuryAllocationService {
   /**
    * Approve an allocation
    */
-  async approveAllocation(id: string, approvedBy?: string): Promise<Allocation> {
+  async approveAllocation(
+    id: string,
+    approvedBy?: string
+  ): Promise<Allocation> {
     return this.update(id, {
       status: AllocationStatus.APPROVED,
       approvedBy,
@@ -345,7 +423,7 @@ export class TreasuryAllocationService {
     amount: string,
     blockchainTxHash?: string,
     reference?: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, any>
   ): Promise<Allocation> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -356,7 +434,7 @@ export class TreasuryAllocationService {
       const allocation = await queryRunner.manager.findOne(Allocation, {
         where: { id },
         relations: ['budget', 'asset'],
-        lock: { mode: 'pessimistic_write' }
+        lock: { mode: 'pessimistic_write' },
       });
 
       if (!allocation) {
@@ -365,13 +443,20 @@ export class TreasuryAllocationService {
 
       // Validate allocation status
       if (allocation.status !== AllocationStatus.APPROVED) {
-        throw new BusinessLogicError(`Cannot disburse from allocation with status ${allocation.status}`);
+        throw new BusinessLogicError(
+          `Cannot disburse from allocation with status ${allocation.status}`
+        );
       }
 
       // Validate amount
       const disbursementAmount = new BigNumber(amount);
-      if (disbursementAmount.isNaN() || disbursementAmount.isLessThanOrEqualTo(0)) {
-        throw new ValidationError('Disbursement amount must be a positive number');
+      if (
+        disbursementAmount.isNaN() ||
+        disbursementAmount.isLessThanOrEqualTo(0)
+      ) {
+        throw new ValidationError(
+          'Disbursement amount must be a positive number'
+        );
       }
 
       // Check if there's enough remaining in the allocation
@@ -391,7 +476,7 @@ export class TreasuryAllocationService {
         allocation.id,
         AllocationTransactionType.DISBURSEMENT,
         amount,
-        "",
+        '',
         blockchainTxHash,
         reference,
         metadata
@@ -426,8 +511,12 @@ export class TreasuryAllocationService {
       ) {
         throw error;
       }
-      this.logger.error(`Error processing disbursement for allocation ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to process disbursement: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error processing disbursement for allocation ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to process disbursement: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -436,14 +525,18 @@ export class TreasuryAllocationService {
   /**
    * Get allocation transactions
    */
-  async getAllocationTransactions(allocationId: string): Promise<AllocationTransaction[]> {
+  async getAllocationTransactions(
+    allocationId: string
+  ): Promise<AllocationTransaction[]> {
     try {
       const transactions = await this.allocationTransactionRepository.find({
         where: { allocationId },
-        order: { createdAt: 'DESC' }
+        order: { createdAt: 'DESC' },
       });
 
-      this.logger.debug(`Retrieved ${transactions.length} transactions for allocation ${allocationId}`);
+      this.logger.debug(
+        `Retrieved ${transactions.length} transactions for allocation ${allocationId}`
+      );
       return transactions;
     } catch (error) {
       this.logger.error(
@@ -469,7 +562,9 @@ export class TreasuryAllocationService {
 
       // Only allow deletion of pending allocations
       if (allocation.status !== AllocationStatus.PENDING) {
-        throw new BusinessLogicError(`Cannot delete allocation with status ${allocation.status}`);
+        throw new BusinessLogicError(
+          `Cannot delete allocation with status ${allocation.status}`
+        );
       }
 
       // Delete associated transactions
@@ -483,11 +578,18 @@ export class TreasuryAllocationService {
       this.logger.log(`Deleted allocation: ${allocation.title}`);
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      if (error instanceof NotFoundError || error instanceof BusinessLogicError) {
+      if (
+        error instanceof NotFoundError ||
+        error instanceof BusinessLogicError
+      ) {
         throw error;
       }
-      this.logger.error(`Error deleting allocation ${id}: ${formatErrorMessage(error)}`);
-      throw new DatabaseError(`Failed to delete allocation: ${formatErrorMessage(error)}`);
+      this.logger.error(
+        `Error deleting allocation ${id}: ${formatErrorMessage(error)}`
+      );
+      throw new DatabaseError(
+        `Failed to delete allocation: ${formatErrorMessage(error)}`
+      );
     } finally {
       await queryRunner.release();
     }
@@ -497,14 +599,14 @@ export class TreasuryAllocationService {
    * Record an allocation transaction
    */
   private async recordAllocationTransaction(
-    queryRunner: any,
+    queryRunner: import('typeorm').QueryRunner,
     allocationId: string,
     type: AllocationTransactionType,
     amount: string,
     processedBy?: string,
     blockchainTxHash?: string,
     reference?: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, any>
   ): Promise<AllocationTransaction> {
     const transaction = this.allocationTransactionRepository.create({
       allocationId,
@@ -517,7 +619,10 @@ export class TreasuryAllocationService {
       processedAt: new Date(),
     });
 
-    const savedTransaction = await queryRunner.manager.save(transaction);
+    const savedTransaction = await queryRunner.manager.save(
+      AllocationTransaction,
+      transaction
+    );
     this.logger.debug(
       `Recorded allocation transaction of type ${type} and amount ${amount} for allocation ${allocationId}`
     );
@@ -527,13 +632,23 @@ export class TreasuryAllocationService {
   /**
    * Validate status transitions for allocations
    */
-  private async validateStatusTransition(allocation: Allocation, newStatus: AllocationStatus): Promise<void> {
+  private validateStatusTransition(
+    allocation: Allocation,
+    newStatus: AllocationStatus
+  ): void {
     const currentStatus = allocation.status;
 
     // Define allowed transitions
     const allowedTransitions: Record<AllocationStatus, AllocationStatus[]> = {
-      [AllocationStatus.PENDING]: [AllocationStatus.APPROVED, AllocationStatus.REJECTED, AllocationStatus.CANCELLED],
-      [AllocationStatus.APPROVED]: [AllocationStatus.COMPLETED, AllocationStatus.CANCELLED],
+      [AllocationStatus.PENDING]: [
+        AllocationStatus.APPROVED,
+        AllocationStatus.REJECTED,
+        AllocationStatus.CANCELLED,
+      ],
+      [AllocationStatus.APPROVED]: [
+        AllocationStatus.COMPLETED,
+        AllocationStatus.CANCELLED,
+      ],
       [AllocationStatus.REJECTED]: [],
       [AllocationStatus.COMPLETED]: [],
       [AllocationStatus.CANCELLED]: [],
@@ -541,7 +656,7 @@ export class TreasuryAllocationService {
 
     if (!allowedTransitions[currentStatus].includes(newStatus)) {
       throw new BusinessLogicError(
-        `Invalid allocation status transition from ${currentStatus} to ${newStatus}`,
+        `Invalid allocation status transition from ${currentStatus} to ${newStatus}`
       );
     }
   }

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  Query,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { TreasuryBudgetService } from '../services/treasury-budget.service';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { UserRole } from '../../user/entities/user.entity';
@@ -15,7 +26,7 @@ export class TreasuryBudgetController {
   @Roles(UserRole.ADMIN, UserRole.TREASURER, UserRole.AUDITOR)
   async findAll(
     @Query('status') status?: BudgetStatus,
-    @Query('ownerId') ownerId?: string,
+    @Query('ownerId') ownerId?: string
   ) {
     return this.budgetService.findAll(status, ownerId);
   }
@@ -44,10 +55,7 @@ export class TreasuryBudgetController {
    */
   @Put(':id')
   @Roles(UserRole.ADMIN, UserRole.TREASURER)
-  async update(
-    @Param('id') id: string,
-    @Body() budgetData: Partial<Budget>
-  ) {
+  async update(@Param('id') id: string, @Body() budgetData: Partial<Budget>) {
     return this.budgetService.update(id, budgetData);
   }
 

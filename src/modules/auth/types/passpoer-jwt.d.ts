@@ -20,19 +20,19 @@ declare module 'passport-jwt' {
   export namespace ExtractJwt {
     export function fromAuthHeaderAsBearerToken(): (req: any) => string | null;
     export function fromAuthHeaderWithScheme(
-      scheme: string,
+      scheme: string
     ): (req: any) => string | null;
     export function fromHeader(
-      header_name: string,
+      header_name: string
     ): (req: any) => string | null;
     export function fromBodyField(
-      field_name: string,
+      field_name: string
     ): (req: any) => string | null;
     export function fromUrlQueryParameter(
-      param_name: string,
+      param_name: string
     ): (req: any) => string | null;
     export function fromExtractors(
-      extractors: Array<(req: any) => string | null>,
+      extractors: Array<(req: any) => string | null>
     ): (req: any) => string | null;
   }
 }
