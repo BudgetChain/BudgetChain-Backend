@@ -9,8 +9,13 @@ export interface AuditLogRepository extends Repository<AuditLog> {
 }
 
 @Injectable()
-export class AuditLogRepositoryImpl extends Repository<AuditLog> implements AuditLogRepository {
-  constructor(@InjectRepository(AuditLog) private readonly repo: Repository<AuditLog>) {
+export class AuditLogRepositoryImpl
+  extends Repository<AuditLog>
+  implements AuditLogRepository
+{
+  constructor(
+    @InjectRepository(AuditLog) private readonly repo: Repository<AuditLog>
+  ) {
     super(repo.target, repo.manager, repo.queryRunner);
   }
 
@@ -31,16 +36,25 @@ export class AuditLogRepositoryImpl extends Repository<AuditLog> implements Audi
   }
 
   // Read (Custom)
-  async findByEntity(entityId: string, entityType: string): Promise<AuditLog[]> {
+  async findByEntity(
+    entityId: string,
+    entityType: string
+  ): Promise<AuditLog[]> {
     return this.repo.find({ where: { entityId, entityType } });
   }
 
-  async findByAction(entityType: string, action: AuditLogAction): Promise<AuditLog[]> {
+  async findByAction(
+    entityType: string,
+    action: AuditLogAction
+  ): Promise<AuditLog[]> {
     return this.repo.find({ where: { entityType, action } });
   }
 
   // Update
-  async updateAuditLog(id: string, updateData: Partial<AuditLog>): Promise<AuditLog | null> {
+  async updateAuditLog(
+    id: string,
+    updateData: Partial<AuditLog>
+  ): Promise<AuditLog | null> {
     await this.repo.update(id, updateData);
     return this.findById(id);
   }

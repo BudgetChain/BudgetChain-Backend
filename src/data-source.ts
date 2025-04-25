@@ -34,4 +34,4 @@ AppDataSource.initialize()
     await AppDataSource.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
     console.log('Connected to the database with uuid-ossp enabled!');
   })
-  .catch((error) => console.log('Oops, something’s wrong:', error));
+  .catch(error => console.log('Oops, something’s wrong:', error));

@@ -1,5 +1,18 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { IsNotEmpty, IsString, IsNumber, IsPositive, Length } from 'class-validator';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  Index,
+} from 'typeorm';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsPositive,
+  Length,
+} from 'class-validator';
 import { Treasury, ITreasury } from './treasury.entity';
 
 @Entity('assets')

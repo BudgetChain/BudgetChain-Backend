@@ -1,5 +1,19 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany, Index } from 'typeorm';
-import { IsNotEmpty, IsString, IsNumber, IsPositive, Length } from 'class-validator';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+  Index,
+} from 'typeorm';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsPositive,
+  Length,
+} from 'class-validator';
 import { Treasury, ITreasury } from './treasury.entity';
 import { Allocation } from './allocation.entity';
 
@@ -35,7 +49,7 @@ export class Budget {
   @Length(1, 50)
   period: string;
 
-  @OneToMany(() => Allocation, (allocation) => allocation.budget)
+  @OneToMany(() => Allocation, allocation => allocation.budget)
   allocations: Allocation[];
 }
 

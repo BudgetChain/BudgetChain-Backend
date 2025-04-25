@@ -34,7 +34,7 @@ export class UserController {
   @Roles(UserRole.ADMIN)
   updateRole(
     @Param('id') id: string,
-    @Body('role') role: UserRole,
+    @Body('role') role: UserRole
   ): Promise<User> {
     return this.userService.updateRole(id, role);
   }

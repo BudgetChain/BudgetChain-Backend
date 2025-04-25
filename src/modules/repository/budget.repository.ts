@@ -3,16 +3,19 @@ import { Budget } from '../user/entities/budget.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-
-
 export interface BudgetRepository extends Repository<Budget> {
   findByTreasuryId(treasuryId: string): Promise<Budget[]>;
   findByPeriod(treasuryId: string, period: string): Promise<Budget[]>;
 }
 
 @Injectable()
-export class BudgetRepositoryImpl extends Repository<Budget> implements BudgetRepository {
-  constructor(@InjectRepository(Budget) private readonly repo: Repository<Budget>) {
+export class BudgetRepositoryImpl
+  extends Repository<Budget>
+  implements BudgetRepository
+{
+  constructor(
+    @InjectRepository(Budget) private readonly repo: Repository<Budget>
+  ) {
     super(repo.target, repo.manager, repo.queryRunner);
   }
 
@@ -42,7 +45,10 @@ export class BudgetRepositoryImpl extends Repository<Budget> implements BudgetRe
   }
 
   // Update
-  async updateBudget(id: string, updateData: Partial<Budget>): Promise<Budget | null> {
+  async updateBudget(
+    id: string,
+    updateData: Partial<Budget>
+  ): Promise<Budget | null> {
     await this.repo.update(id, updateData);
     return this.findById(id);
   }

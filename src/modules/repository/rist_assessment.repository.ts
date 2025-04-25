@@ -3,20 +3,30 @@ import { RiskAssessment } from '../user/entities/risk_assessment.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-
 export interface RiskAssessmentRepository extends Repository<RiskAssessment> {
   findByTreasuryId(treasuryId: string): Promise<RiskAssessment[]>;
-  findByRiskType(treasuryId: string, riskType: string): Promise<RiskAssessment[]>;
+  findByRiskType(
+    treasuryId: string,
+    riskType: string
+  ): Promise<RiskAssessment[]>;
 }
 
 @Injectable()
-export class RiskAssessmentRepositoryImpl extends Repository<RiskAssessment> implements RiskAssessmentRepository {
-  constructor(@InjectRepository(RiskAssessment) private readonly repo: Repository<RiskAssessment>) {
+export class RiskAssessmentRepositoryImpl
+  extends Repository<RiskAssessment>
+  implements RiskAssessmentRepository
+{
+  constructor(
+    @InjectRepository(RiskAssessment)
+    private readonly repo: Repository<RiskAssessment>
+  ) {
     super(repo.target, repo.manager, repo.queryRunner);
   }
 
   // Create
-  async createRiskAssessment(riskAssessment: Partial<RiskAssessment>): Promise<RiskAssessment> {
+  async createRiskAssessment(
+    riskAssessment: Partial<RiskAssessment>
+  ): Promise<RiskAssessment> {
     const newRiskAssessment = this.repo.create(riskAssessment);
     return this.repo.save(newRiskAssessment);
   }
@@ -36,12 +46,18 @@ export class RiskAssessmentRepositoryImpl extends Repository<RiskAssessment> imp
     return this.repo.find({ where: { treasuryId } });
   }
 
-  async findByRiskType(treasuryId: string, riskType: string): Promise<RiskAssessment[]> {
+  async findByRiskType(
+    treasuryId: string,
+    riskType: string
+  ): Promise<RiskAssessment[]> {
     return this.repo.find({ where: { treasuryId, riskType } });
   }
 
   // Update
-  async updateRiskAssessment(id: string, updateData: Partial<RiskAssessment>): Promise<RiskAssessment | null> {
+  async updateRiskAssessment(
+    id: string,
+    updateData: Partial<RiskAssessment>
+  ): Promise<RiskAssessment | null> {
     await this.repo.update(id, updateData);
     return this.findById(id);
   }

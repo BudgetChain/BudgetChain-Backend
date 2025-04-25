@@ -3,15 +3,19 @@ import { Allocation } from '../user/entities/allocation.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-
 export interface AllocationRepository extends Repository<Allocation> {
   findByBudgetId(budgetId: string): Promise<Allocation[]>;
   findByPurpose(budgetId: string, purpose: string): Promise<Allocation[]>;
 }
 
 @Injectable()
-export class AllocationRepositoryImpl extends Repository<Allocation> implements AllocationRepository {
-  constructor(@InjectRepository(Allocation) private readonly repo: Repository<Allocation>) {
+export class AllocationRepositoryImpl
+  extends Repository<Allocation>
+  implements AllocationRepository
+{
+  constructor(
+    @InjectRepository(Allocation) private readonly repo: Repository<Allocation>
+  ) {
     super(repo.target, repo.manager, repo.queryRunner);
   }
 
@@ -36,12 +40,18 @@ export class AllocationRepositoryImpl extends Repository<Allocation> implements 
     return this.repo.find({ where: { budgetId } });
   }
 
-  async findByPurpose(budgetId: string, purpose: string): Promise<Allocation[]> {
+  async findByPurpose(
+    budgetId: string,
+    purpose: string
+  ): Promise<Allocation[]> {
     return this.repo.find({ where: { budgetId, purpose } });
   }
 
   // Update
-  async updateAllocation(id: string, updateData: Partial<Allocation>): Promise<Allocation | null> {
+  async updateAllocation(
+    id: string,
+    updateData: Partial<Allocation>
+  ): Promise<Allocation | null> {
     await this.repo.update(id, updateData);
     return this.findById(id);
   }

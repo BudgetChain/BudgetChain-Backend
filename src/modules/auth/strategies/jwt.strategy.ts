@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly jwtConfig: JwtConfigService, // Injecting custom JWT config
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    private readonly logger: LoggingService,
+    private readonly logger: LoggingService
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

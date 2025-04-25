@@ -15,7 +15,7 @@ export class StarknetStrategy extends PassportStrategy(Strategy, 'starknet') {
   }
 
   async validate(
-    request: Request,
+    request: Request
   ): Promise<{ id: string; email: string; roles?: string[] }> {
     // Validate that request.body exists and is an object
     if (!request.body || typeof request.body !== 'object') {

@@ -1,5 +1,19 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { IsNotEmpty, IsString, IsNumber, IsPositive, IsEnum, IsDate } from 'class-validator';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  Index,
+} from 'typeorm';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsPositive,
+  IsEnum,
+  IsDate,
+} from 'class-validator';
 import { Treasury, ITreasury } from './treasury.entity';
 
 export enum TransactionType {
@@ -42,7 +56,11 @@ export class Transaction {
   @IsDate()
   date: Date;
 
-  @Column({ type: 'enum', enum: TransactionStatus, default: TransactionStatus.PENDING })
+  @Column({
+    type: 'enum',
+    enum: TransactionStatus,
+    default: TransactionStatus.PENDING,
+  })
   @IsEnum(TransactionStatus)
   status: TransactionStatus;
 }

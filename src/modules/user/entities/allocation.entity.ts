@@ -1,5 +1,18 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { IsNotEmpty, IsString, IsNumber, IsPositive, Length } from 'class-validator';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  Index,
+} from 'typeorm';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsPositive,
+  Length,
+} from 'class-validator';
 import { Budget, IBudget } from './budget.entity';
 
 @Entity('allocations')

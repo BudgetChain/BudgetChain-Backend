@@ -9,8 +9,13 @@ export interface TreasuryRepository extends Repository<Treasury> {
 }
 
 @Injectable()
-export class TreasuryRepositoryImpl extends Repository<Treasury> implements TreasuryRepository {
-  constructor(@InjectRepository(Treasury) private readonly repo: Repository<Treasury>) {
+export class TreasuryRepositoryImpl
+  extends Repository<Treasury>
+  implements TreasuryRepository
+{
+  constructor(
+    @InjectRepository(Treasury) private readonly repo: Repository<Treasury>
+  ) {
     super(repo.target, repo.manager, repo.queryRunner);
   }
 
@@ -38,7 +43,10 @@ export class TreasuryRepositoryImpl extends Repository<Treasury> implements Trea
     });
   }
 
-  async updateTreasury(id: string, updateData: Partial<Treasury>): Promise<Treasury | null> {
+  async updateTreasury(
+    id: string,
+    updateData: Partial<Treasury>
+  ): Promise<Treasury | null> {
     await this.repo.update(id, updateData);
     return this.findById(id);
   }

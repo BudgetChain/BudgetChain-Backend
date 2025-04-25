@@ -31,7 +31,7 @@ export class CreateTreasuryTables1745568487893 implements MigrationInterface {
             )
         `);
     await queryRunner.query(
-      `CREATE INDEX "idx_assets_treasuryId" ON "assets" ("treasuryId")`,
+      `CREATE INDEX "idx_assets_treasuryId" ON "assets" ("treasuryId")`
     );
 
     // Create transactions
@@ -53,7 +53,7 @@ export class CreateTreasuryTables1745568487893 implements MigrationInterface {
             )
         `);
     await queryRunner.query(
-      `CREATE INDEX "idx_transactions_treasuryId" ON "transactions" ("treasuryId")`,
+      `CREATE INDEX "idx_transactions_treasuryId" ON "transactions" ("treasuryId")`
     );
 
     // Create budgets
@@ -68,7 +68,7 @@ export class CreateTreasuryTables1745568487893 implements MigrationInterface {
             )
         `);
     await queryRunner.query(
-      `CREATE INDEX "idx_budgets_treasuryId" ON "budgets" ("treasuryId")`,
+      `CREATE INDEX "idx_budgets_treasuryId" ON "budgets" ("treasuryId")`
     );
 
     // Create allocations
@@ -82,7 +82,7 @@ export class CreateTreasuryTables1745568487893 implements MigrationInterface {
             )
         `);
     await queryRunner.query(
-      `CREATE INDEX "idx_allocations_budgetId" ON "allocations" ("budgetId")`,
+      `CREATE INDEX "idx_allocations_budgetId" ON "allocations" ("budgetId")`
     );
 
     // Create risk_assessments
@@ -97,7 +97,7 @@ export class CreateTreasuryTables1745568487893 implements MigrationInterface {
             )
         `);
     await queryRunner.query(
-      `CREATE INDEX "idx_risk_assessments_treasuryId" ON "risk_assessments" ("treasuryId")`,
+      `CREATE INDEX "idx_risk_assessments_treasuryId" ON "risk_assessments" ("treasuryId")`
     );
 
     // Create audit_logs
@@ -152,19 +152,19 @@ export class CreateTreasuryTables1745568487893 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Drop foreign keys
     await queryRunner.query(
-      `ALTER TABLE "risk_assessments" DROP CONSTRAINT "FK_risk_assessments_treasuryId"`,
+      `ALTER TABLE "risk_assessments" DROP CONSTRAINT "FK_risk_assessments_treasuryId"`
     );
     await queryRunner.query(
-      `ALTER TABLE "allocations" DROP CONSTRAINT "FK_allocations_budgetId"`,
+      `ALTER TABLE "allocations" DROP CONSTRAINT "FK_allocations_budgetId"`
     );
     await queryRunner.query(
-      `ALTER TABLE "budgets" DROP CONSTRAINT "FK_budgets_treasuryId"`,
+      `ALTER TABLE "budgets" DROP CONSTRAINT "FK_budgets_treasuryId"`
     );
     await queryRunner.query(
-      `ALTER TABLE "transactions" DROP CONSTRAINT "FK_transactions_treasuryId"`,
+      `ALTER TABLE "transactions" DROP CONSTRAINT "FK_transactions_treasuryId"`
     );
     await queryRunner.query(
-      `ALTER TABLE "assets" DROP CONSTRAINT "FK_assets_treasuryId"`,
+      `ALTER TABLE "assets" DROP CONSTRAINT "FK_assets_treasuryId"`
     );
 
     // Drop tables and indexes
@@ -172,7 +172,7 @@ export class CreateTreasuryTables1745568487893 implements MigrationInterface {
     await queryRunner.query(`DROP TYPE "public"."audit_logs_action_enum"`);
     await queryRunner.query(`DROP TABLE "risk_assessments"`);
     await queryRunner.query(
-      `DROP INDEX "public"."idx_risk_assessments_treasuryId"`,
+      `DROP INDEX "public"."idx_risk_assessments_treasuryId"`
     );
     await queryRunner.query(`DROP TABLE "allocations"`);
     await queryRunner.query(`DROP INDEX "public"."idx_allocations_budgetId"`);

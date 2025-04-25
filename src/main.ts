@@ -9,11 +9,11 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-    }),
+    })
   );
   await app.listen(process.env.APP_PORT ?? 3000);
 }
 
-bootstrap().catch((err) => {
+bootstrap().catch(err => {
   console.error('Error bootstrapping the application:', err);
 });

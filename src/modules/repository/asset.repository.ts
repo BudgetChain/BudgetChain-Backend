@@ -9,8 +9,13 @@ export interface AssetRepository extends Repository<Asset> {
 }
 
 @Injectable()
-export class AssetRepositoryImpl extends Repository<Asset> implements AssetRepository {
-  constructor(@InjectRepository(Asset) private readonly repo: Repository<Asset>) {
+export class AssetRepositoryImpl
+  extends Repository<Asset>
+  implements AssetRepository
+{
+  constructor(
+    @InjectRepository(Asset) private readonly repo: Repository<Asset>
+  ) {
     super(repo.target, repo.manager, repo.queryRunner);
   }
 
@@ -35,7 +40,10 @@ export class AssetRepositoryImpl extends Repository<Asset> implements AssetRepos
     return this.repo.find({ where: { treasuryId, type } });
   }
 
-  async updateAsset(id: string, updateData: Partial<Asset>): Promise<Asset | null> {
+  async updateAsset(
+    id: string,
+    updateData: Partial<Asset>
+  ): Promise<Asset | null> {
     await this.repo.update(id, updateData);
     return this.findById(id);
   }
