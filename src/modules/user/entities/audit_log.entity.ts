@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { IsNotEmpty, IsString, IsEnum, IsOptional } from 'class-validator';
 
 export enum AuditLogAction {
