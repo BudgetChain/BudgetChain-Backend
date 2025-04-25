@@ -19,7 +19,7 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto): Promise<{ token: string }> {
     const user = await this.authService.validateUser(
       loginDto.email,
-      loginDto.password,
+      loginDto.password
     );
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -31,10 +31,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('wallet-login')
   async walletLogin(
-    @Body() walletLoginDto: WalletLoginDto,
+    @Body() walletLoginDto: WalletLoginDto
   ): Promise<{ token: string }> {
     const user = await this.authService.validateWallet(
-      walletLoginDto.walletAddress,
+      walletLoginDto.walletAddress
     );
     if (!user) {
       throw new UnauthorizedException('Invalid wallet address');

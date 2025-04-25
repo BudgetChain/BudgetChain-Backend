@@ -16,7 +16,7 @@ export class RolesGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
       ROLES_KEY,
-      [context.getHandler(), context.getClass()],
+      [context.getHandler(), context.getClass()]
     );
 
     if (!requiredRoles || requiredRoles.length === 0) {
@@ -33,12 +33,10 @@ export class RolesGuard implements CanActivate {
     // Ensure roles is always an array (fallback to empty array if undefined)
     const userRoles = user.roles || [];
 
-    const hasPermission = requiredRoles.some((role) =>
-      userRoles.includes(role),
-    );
+    const hasPermission = requiredRoles.some(role => userRoles.includes(role));
     if (!hasPermission) {
       throw new ForbiddenException(
-        `Access denied: Requires one of the following roles: [${requiredRoles.join(', ')}]`,
+        `Access denied: Requires one of the following roles: [${requiredRoles.join(', ')}]`
       );
     }
 

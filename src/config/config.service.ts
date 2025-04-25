@@ -8,7 +8,7 @@ type Config = ConfigType<typeof configuration>;
 @Injectable()
 export class ConfigService {
   constructor(
-    private readonly nestConfigService: NestConfigService<Config, true>,
+    private readonly nestConfigService: NestConfigService<Config, true>
   ) {}
 
   get<T extends keyof Config>(propertyPath: T): Config[T] {

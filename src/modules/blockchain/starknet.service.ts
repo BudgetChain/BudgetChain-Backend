@@ -12,7 +12,7 @@ export class StarknetService {
 
   constructor(
     @Inject(LoggingService) // Use forwardRef to resolve LoggingService
-    private logger: LoggingService,
+    private logger: LoggingService
   ) {
     if (!this.logger) {
       throw new Error('LoggingService is not provided');
@@ -28,11 +28,11 @@ export class StarknetService {
     } catch (error: unknown) {
       const errorMessage = formatErrorMessage(error);
       this.logger.error(
-        `Failed to initialize Starknet provider: ${errorMessage}`,
+        `Failed to initialize Starknet provider: ${errorMessage}`
       );
       throw new ExternalServiceError(
         'Starknet',
-        `Provider initialization failed: ${errorMessage}`,
+        `Provider initialization failed: ${errorMessage}`
       );
     }
   }
@@ -47,24 +47,24 @@ export class StarknetService {
   verifySignature(
     walletAddress: string,
     signature: string,
-    message: string,
+    message: string
   ): boolean {
     try {
       // Convert message to hash using the Pedersen hash
       const messageHash = ec.starkCurve.pedersen(
         BigInt(0),
-        BigInt(Buffer.from(message).toString('hex')),
+        BigInt(Buffer.from(message).toString('hex'))
       );
 
       // Verify the signature using the StarkNet library
       const isValid = ec.starkCurve.verify(
         signature,
         messageHash.toString(),
-        walletAddress,
+        walletAddress
       );
 
       this.logger.debug(
-        `Signature verification result for wallet ${walletAddress}: ${isValid}`,
+        `Signature verification result for wallet ${walletAddress}: ${isValid}`
       );
       return isValid;
     } catch (error: unknown) {
@@ -90,7 +90,7 @@ export class StarknetService {
       this.logger.error(`Error getting block number: ${errorMessage}`);
       throw new ExternalServiceError(
         'Starknet',
-        `Failed to get block number: ${errorMessage}`,
+        `Failed to get block number: ${errorMessage}`
       );
     }
   }
@@ -109,11 +109,11 @@ export class StarknetService {
     } catch (error: unknown) {
       const errorMessage = formatErrorMessage(error);
       this.logger.error(
-        `Error retrieving transaction ${txHash}: ${errorMessage}`,
+        `Error retrieving transaction ${txHash}: ${errorMessage}`
       );
       throw new ExternalServiceError(
         'Starknet',
-        `Failed to retrieve transaction: ${errorMessage}`,
+        `Failed to retrieve transaction: ${errorMessage}`
       );
     }
   }
