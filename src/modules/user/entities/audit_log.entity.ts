@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { IsNotEmpty, IsString, IsDate, IsEnum, Length } from 'class-validator';
+import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
+import { IsNotEmpty, IsString, IsEnum, IsOptional } from 'class-validator';
 
-export enum AuditAction {
+export enum AuditLogAction {
   CREATE = 'CREATE',
   UPDATE = 'UPDATE',
   DELETE = 'DELETE',
@@ -12,35 +12,34 @@ export class AuditLog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   @IsNotEmpty()
   @IsString()
   entityId: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 50 })
   @IsNotEmpty()
   @IsString()
-  @Length(1, 50)
   entityType: string;
 
-  @Column({ type: 'enum', enum: AuditAction })
-  @IsEnum(AuditAction)
-  action: AuditAction;
+  @Column({ type: 'enum', enum: AuditLogAction })
+  @IsEnum(AuditLogAction)
+  action: AuditLogAction;
 
-  @Column()
-  @IsDate()
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   timestamp: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
+  @IsOptional()
   @IsString()
-  userId: string;
+  userId: string | null;
 }
 
 export interface IAuditLog {
   id: string;
   entityId: string;
   entityType: string;
-  action: AuditAction;
+  action: AuditLogAction;
   timestamp: Date;
   userId: string | null;
 }

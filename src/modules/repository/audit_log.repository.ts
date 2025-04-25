@@ -1,11 +1,11 @@
 import { Repository } from 'typeorm';
-import { AuditLog, AuditAction } from '../user/entities/audit_log.entity';
+import { AuditLog, AuditLogAction } from '../user/entities/audit_log.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 export interface AuditLogRepository extends Repository<AuditLog> {
   findByEntity(entityId: string, entityType: string): Promise<AuditLog[]>;
-  findByAction(entityType: string, action: AuditAction): Promise<AuditLog[]>;
+  findByAction(entityType: string, action: AuditLogAction): Promise<AuditLog[]>;
 }
 
 @Injectable()
@@ -35,7 +35,7 @@ export class AuditLogRepositoryImpl extends Repository<AuditLog> implements Audi
     return this.repo.find({ where: { entityId, entityType } });
   }
 
-  async findByAction(entityType: string, action: AuditAction): Promise<AuditLog[]> {
+  async findByAction(entityType: string, action: AuditLogAction): Promise<AuditLog[]> {
     return this.repo.find({ where: { entityType, action } });
   }
 
