@@ -23,5 +23,5 @@ export const CurrentUser = createParamDecorator<TokenUser>(
     }
 
     return request.user; // Type-safe user object
-  },
+  }
 );

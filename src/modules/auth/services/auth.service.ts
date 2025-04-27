@@ -15,12 +15,12 @@ interface UserServiceWithWallet extends UserService {
 export class AuthService {
   constructor(
     private configService: ConfigService,
-    private userService: UserService,
+    private userService: UserService
   ) {}
 
   async validateUser(
     email: string,
-    password: string,
+    password: string
   ): Promise<{ id: string; email: string; roles?: UserRole[] } | null> {
     const user: User | null = await this.userService.findByEmail(email);
     // Use "password" because your entity defines it that way.
@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   async validateWallet(
-    walletAddress: string,
+    walletAddress: string
   ): Promise<{ id: string; email: string; roles?: UserRole[] } | null> {
     // Cast userService to the extended interface rather than to any.
     const userServiceWithWallet = this.userService as UserServiceWithWallet;
@@ -47,7 +47,7 @@ export class AuthService {
   generateToken(user: Partial<JwtPayload>): string {
     if (!user.sub || !user.email) {
       throw new Error(
-        'Missing required fields (sub or email) for token generation',
+        'Missing required fields (sub or email) for token generation'
       );
     }
     const payload: JwtPayload = {
@@ -70,7 +70,7 @@ export class AuthService {
     const expiresIn = Number(expiresInRaw);
     if (isNaN(expiresIn)) {
       throw new Error(
-        `JWT_EXPIRES_IN must be a valid number, got "${expiresInRaw}"`,
+        `JWT_EXPIRES_IN must be a valid number, got "${expiresInRaw}"`
       );
     }
 

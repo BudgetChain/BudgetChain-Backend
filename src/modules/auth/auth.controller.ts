@@ -24,7 +24,7 @@ export class AuthController {
 
   @Post('starknet')
   async starknetAuth(
-    @Body() starknetAuthDto: StarknetAuthDto,
+    @Body() starknetAuthDto: StarknetAuthDto
   ): Promise<TokenResponse> {
     console.log('Starknet Auth Request:', starknetAuthDto);
     return this.authService.authenticateWithStarknet(starknetAuthDto);
@@ -42,7 +42,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('protected-route')
   async getProtectedRoute(
-    @CurrentUser() user: User,
+    @CurrentUser() user: User
   ): Promise<{ message: string; user: User }> {
     console.log('Protected Route Access:', user);
 
