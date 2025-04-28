@@ -8,7 +8,8 @@ const toInt = (value: string | undefined, fallback: number): number => {
   return Number.isNaN(num) ? fallback : num;
 };
 
-const config = {
+// Export a factory function
+export default () => ({
   env: process.env.NODE_ENV || 'development',
   name: process.env.APP_NAME || 'budget-chain-backend',
   port: toInt(process.env.PORT, 3000),
@@ -27,6 +28,4 @@ const config = {
       })(),
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',
   },
-};
-
-export default config;
+});

@@ -31,7 +31,7 @@ export class Transaction {
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToMany(() => LedgerEntry, (ledgerEntry) => ledgerEntry.transaction, {
+  @OneToMany(() => LedgerEntry, ledgerEntry => ledgerEntry.transaction, {
     cascade: true,
   })
   ledgerEntries: LedgerEntry[];

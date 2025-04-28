@@ -7,7 +7,7 @@ export class LedgerEntry {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Transaction, (transaction) => transaction.ledgerEntries)
+  @ManyToOne(() => Transaction, transaction => transaction.ledgerEntries)
   transaction: Transaction;
 
   @ManyToOne(() => Account)

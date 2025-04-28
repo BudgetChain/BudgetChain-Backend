@@ -40,7 +40,7 @@ export class LoggingService implements LoggerService {
       typeof message === 'string' ? message : JSON.stringify(message, null, 2);
     // turn params into strings too
     const rest = optionalParams
-      .map((p) => (typeof p === 'string' ? p : JSON.stringify(p, null, 2)))
+      .map(p => (typeof p === 'string' ? p : JSON.stringify(p, null, 2)))
       .join(' ');
     const payload = rest ? `${main} ${rest}` : main;
     const output = `[${timestamp}] ${level.toUpperCase()} ${contextTag}${payload}`;

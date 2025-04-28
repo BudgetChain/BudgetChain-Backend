@@ -28,7 +28,7 @@ export class TransactionService {
     @InjectRepository(AuditLog)
     private auditLogRepository: Repository<AuditLog>,
     @InjectRepository(Account)
-    private accountRepository: Repository<Account>,
+    private accountRepository: Repository<Account>
   ) {}
 
   async createTransaction(
@@ -41,13 +41,13 @@ export class TransactionService {
       type: 'debit' | 'credit';
       amount: number;
     }[],
-    metadata?: Metadata,
+    metadata?: Metadata
   ): Promise<Transaction> {
     const debitTotal = ledgerEntriesData
-      .filter((e) => e.type === 'debit')
+      .filter(e => e.type === 'debit')
       .reduce((sum, e) => sum + e.amount, 0);
     const creditTotal = ledgerEntriesData
-      .filter((e) => e.type === 'credit')
+      .filter(e => e.type === 'credit')
       .reduce((sum, e) => sum + e.amount, 0);
     if (debitTotal !== creditTotal) {
       throw new Error('Debits must equal credits for double-entry bookkeeping');
@@ -92,7 +92,7 @@ export class TransactionService {
       type: 'debit' | 'credit';
       amount: number;
     }[],
-    metadata?: Metadata,
+    metadata?: Metadata
   ): Promise<Transaction> {
     const transaction = await this.transactionRepository.findOneOrFail({
       where: { id },
@@ -107,14 +107,14 @@ export class TransactionService {
 
     if (ledgerEntriesData) {
       const debitTotal = ledgerEntriesData
-        .filter((e) => e.type === 'debit')
+        .filter(e => e.type === 'debit')
         .reduce((sum, e) => sum + e.amount, 0);
       const creditTotal = ledgerEntriesData
-        .filter((e) => e.type === 'credit')
+        .filter(e => e.type === 'credit')
         .reduce((sum, e) => sum + e.amount, 0);
       if (debitTotal !== creditTotal) {
         throw new Error(
-          'Debits must equal credits for double-entry bookkeeping',
+          'Debits must equal credits for double-entry bookkeeping'
         );
       }
 
@@ -161,7 +161,7 @@ export class TransactionService {
       description?: string;
     },
     page: number = 1,
-    limit: number = 10,
+    limit: number = 10
   ): Promise<{ transactions: Transaction[]; total: number }> {
     const query = this.transactionRepository
       .createQueryBuilder('transaction')
@@ -206,26 +206,26 @@ export class TransactionService {
         relations: ['transaction'],
       });
       const debitSum = ledgerEntries
-        .filter((e) => e.type === 'debit')
+        .filter(e => e.type === 'debit')
         .reduce((sum, e) => sum + Number(e.amount), 0);
       const creditSum = ledgerEntries
-        .filter((e) => e.type === 'credit')
+        .filter(e => e.type === 'credit')
         .reduce((sum, e) => sum + Number(e.amount), 0);
       const calculatedBalance = creditSum - debitSum;
 
       if (calculatedBalance !== Number(account.balance)) {
-        const transactionIds = ledgerEntries.map((e) => e.transaction.id);
+        const transactionIds = ledgerEntries.map(e => e.transaction.id);
         await this.transactionRepository.update(
           { id: In(transactionIds) },
-          { reconciled: false },
+          { reconciled: false }
         );
         account.balance = calculatedBalance;
         await this.accountRepository.save(account); // Update balance per Issue #19 integration
       } else {
-        const transactionIds = ledgerEntries.map((e) => e.transaction.id);
+        const transactionIds = ledgerEntries.map(e => e.transaction.id);
         await this.transactionRepository.update(
           { id: In(transactionIds) },
-          { reconciled: true },
+          { reconciled: true }
         );
       }
     }
@@ -233,14 +233,14 @@ export class TransactionService {
 
   async generateReport(
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<{ category: string; totalAmount: number }[]> {
     const results = await this.transactionRepository
       .createQueryBuilder('transaction')
       .select('transaction.category', 'category')
       .addSelect(
         "SUM(CASE WHEN ledgerEntry.type = 'credit' THEN ledgerEntry.amount ELSE -ledgerEntry.amount END)",
-        'totalAmount',
+        'totalAmount'
       )
       .leftJoin('transaction.ledgerEntries', 'ledgerEntry')
       .where('transaction.date BETWEEN :startDate AND :endDate', {
@@ -250,7 +250,7 @@ export class TransactionService {
       .groupBy('transaction.category')
       .getRawMany<ReportRow>();
 
-    return results.map((row) => ({
+    return results.map(row => ({
       category: row.category,
       totalAmount: parseFloat(row.totalAmount),
     }));
@@ -261,7 +261,7 @@ export class TransactionService {
     entityName: string,
     entityId: number,
     action: string,
-    changes: Record<string, unknown>,
+    changes: Record<string, unknown>
   ): Promise<void> {
     const auditLog = this.auditLogRepository.create({
       entityName,

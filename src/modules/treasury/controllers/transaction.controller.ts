@@ -40,7 +40,7 @@ export class TransactionController {
         amount: number;
       }[];
       metadata?: Metadata;
-    },
+    }
   ) {
     return this.transactionService.createTransaction(
       req.user,
@@ -48,7 +48,7 @@ export class TransactionController {
       body.description,
       body.category,
       body.ledgerEntries,
-      body.metadata,
+      body.metadata
     );
   }
 
@@ -68,7 +68,7 @@ export class TransactionController {
         amount: number;
       }[];
       metadata?: Metadata;
-    },
+    }
   ) {
     return this.transactionService.updateTransaction(
       id,
@@ -77,7 +77,7 @@ export class TransactionController {
       body.description,
       body.category,
       body.ledgerEntries,
-      body.metadata,
+      body.metadata
     );
   }
 
@@ -85,7 +85,7 @@ export class TransactionController {
   @Roles(UserRole.ADMIN)
   async deleteTransaction(
     @Param('id') id: number,
-    @Request() req: { user: User },
+    @Request() req: { user: User }
   ) {
     await this.transactionService.deleteTransaction(id, req.user);
     return { message: 'Transaction deleted successfully' };
@@ -100,7 +100,7 @@ export class TransactionController {
     @Query('accountId') accountId?: number,
     @Query('description') description?: string,
     @Query('page') page = 1,
-    @Query('limit') limit = 10,
+    @Query('limit') limit = 10
   ) {
     const filters = { startDate, endDate, category, accountId, description };
     return this.transactionService.findTransactions(filters, page, limit);
@@ -117,7 +117,7 @@ export class TransactionController {
   @Roles(UserRole.USER, UserRole.ADMIN)
   async generateReport(
     @Query('startDate') startDate: Date,
-    @Query('endDate') endDate: Date,
+    @Query('endDate') endDate: Date
   ) {
     return this.transactionService.generateReport(startDate, endDate);
   }
