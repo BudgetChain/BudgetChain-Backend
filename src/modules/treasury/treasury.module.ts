@@ -9,27 +9,7 @@ import { TransactionController } from './controllers/transaction.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Asset,
-      AssetTransaction,
-      Budget,
-      Allocation,
-      AllocationTransaction,
-      Treasury,
-      Transaction,
-      RiskAssessment,
-      AuditLog,
-    ]),
-    ConfigModule,
-    BlockchainModule,
-  ],
-  controllers: [
-    TreasuryController,
-    TreasuryAssetController,
-    TreasuryTransactionController,
-    TreasuryBudgetController,
-    TreasuryAllocationController,
-    TransactionController,
+    TypeOrmModule.forFeature([Transaction, LedgerEntry, AuditLog, Account]),
   ],
   providers: [TransactionService],
   controllers: [TransactionController],
