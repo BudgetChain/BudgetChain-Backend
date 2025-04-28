@@ -8,47 +8,44 @@ export class LoggingService implements LoggerService {
     this.context = context;
   }
 
-  log(message: any, ...optionalParams: any[]) {
+  log(message: unknown, ...optionalParams: unknown[]) {
     this.printMessage('log', message, ...optionalParams);
   }
 
-  error(message: any, ...optionalParams: any[]) {
+  error(message: unknown, ...optionalParams: unknown[]) {
     this.printMessage('error', message, ...optionalParams);
   }
 
-  warn(message: any, ...optionalParams: any[]) {
+  warn(message: unknown, ...optionalParams: unknown[]) {
     this.printMessage('warn', message, ...optionalParams);
   }
 
-  debug(message: any, ...optionalParams: any[]) {
+  debug(message: unknown, ...optionalParams: unknown[]) {
     this.printMessage('debug', message, ...optionalParams);
   }
 
-  verbose(message: any, ...optionalParams: any[]) {
+  verbose(message: unknown, ...optionalParams: unknown[]) {
     this.printMessage('verbose', message, ...optionalParams);
   }
 
-  private printMessage(level: string, message: any, ...optionalParams: any[]) {
+  private printMessage(
+    level: 'log' | 'error' | 'warn' | 'debug' | 'verbose',
+    message: unknown,
+    ...optionalParams: unknown[]
+  ) {
     const timestamp = new Date().toISOString();
-    let logMessage = `[${timestamp}] ${level.toUpperCase()} `;
+    const contextTag = this.context ? `[${this.context}] ` : '';
+    // ensure message is a string
+    const main =
+      typeof message === 'string' ? message : JSON.stringify(message, null, 2);
+    // turn params into strings too
+    const rest = optionalParams
+      .map((p) => (typeof p === 'string' ? p : JSON.stringify(p, null, 2)))
+      .join(' ');
+    const payload = rest ? `${main} ${rest}` : main;
+    const output = `[${timestamp}] ${level.toUpperCase()} ${contextTag}${payload}`;
 
-    if (this.context) {
-      logMessage += `[${this.context}] `;
-    }
-
-    logMessage += message;
-
-    if (optionalParams.length > 0) {
-      logMessage += ` ${optionalParams.join(' ')}`;
-    }
-
-    if (process.env.NODE_ENV === 'production') {
-      // In production, you might want to send logs to a centralized logging system
-      // (e.g., using Winston, Morgan, or a cloud logging service)
-      console.log(logMessage); // Or send to your logging service
-    } else {
-      // In development, you can simply print to the console
-      console.log(logMessage);
-    }
+    // console.log only sees a single string, so no spread of any[]
+    console.log(output);
   }
 }

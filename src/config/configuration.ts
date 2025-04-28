@@ -2,7 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Helper to parse integers robustly
-const toInt = (value, fallback) => {
+const toInt = (value: string | undefined, fallback: number): number => {
+  if (value === undefined) return fallback;
   const num = parseInt(value, 10);
   return Number.isNaN(num) ? fallback : num;
 };
@@ -19,8 +20,11 @@ const config = {
     name: process.env.DATABASE_NAME || 'budgetchain',
   },
   jwt: {
-    // Throw error if secret isn't set for security
-    secret: process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET is not defined'); })(),
+    secret:
+      process.env.JWT_SECRET ||
+      (() => {
+        throw new Error('JWT_SECRET is not defined');
+      })(),
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',
   },
 };

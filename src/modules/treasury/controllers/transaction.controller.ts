@@ -1,8 +1,24 @@
-import { Controller, Post, Get, Put, Delete, Param, Body, Query, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Delete,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { TransactionService } from '../services/transaction.service';
 import { RolesGuard } from '../../../shared/guards/roles.guard';
 import { Roles } from '../../../shared/decorators/roles.decorator';
-import { UserRole } from '../../user/entities/user.entity';
+import { UserRole, User } from '../../user/entities/user.entity';
+
+// Import Metadata from transaction.service.ts
+interface Metadata {
+  [key: string]: unknown;
+}
 
 @Controller('transactions')
 @UseGuards(RolesGuard)
@@ -12,13 +28,18 @@ export class TransactionController {
   @Post()
   @Roles(UserRole.ADMIN)
   async createTransaction(
-    @Request() req,
-    @Body() body: {
+    @Request() req: { user: User },
+    @Body()
+    body: {
       date: Date;
       description: string;
       category: string;
-      ledgerEntries: { accountId: number; type: 'debit' | 'credit'; amount: number }[];
-      metadata?: any;
+      ledgerEntries: {
+        accountId: number;
+        type: 'debit' | 'credit';
+        amount: number;
+      }[];
+      metadata?: Metadata;
     },
   ) {
     return this.transactionService.createTransaction(
@@ -35,13 +56,18 @@ export class TransactionController {
   @Roles(UserRole.ADMIN)
   async updateTransaction(
     @Param('id') id: number,
-    @Request() req,
-    @Body() body: {
+    @Request() req: { user: User },
+    @Body()
+    body: {
       date?: Date;
       description?: string;
       category?: string;
-      ledgerEntries?: { accountId: number; type: 'debit' | 'credit'; amount: number }[];
-      metadata?: any;
+      ledgerEntries?: {
+        accountId: number;
+        type: 'debit' | 'credit';
+        amount: number;
+      }[];
+      metadata?: Metadata;
     },
   ) {
     return this.transactionService.updateTransaction(
@@ -57,7 +83,10 @@ export class TransactionController {
 
   @Delete(':id')
   @Roles(UserRole.ADMIN)
-  async deleteTransaction(@Param('id') id: number, @Request() req) {
+  async deleteTransaction(
+    @Param('id') id: number,
+    @Request() req: { user: User },
+  ) {
     await this.transactionService.deleteTransaction(id, req.user);
     return { message: 'Transaction deleted successfully' };
   }
@@ -86,7 +115,10 @@ export class TransactionController {
 
   @Get('report')
   @Roles(UserRole.USER, UserRole.ADMIN)
-  async generateReport(@Query('startDate') startDate: Date, @Query('endDate') endDate: Date) {
+  async generateReport(
+    @Query('startDate') startDate: Date,
+    @Query('endDate') endDate: Date,
+  ) {
     return this.transactionService.generateReport(startDate, endDate);
   }
 }

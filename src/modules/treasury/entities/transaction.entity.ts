@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  CreateDateColumn,
+  Index,
+} from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { LedgerEntry } from './ledger-entry.entity';
 
@@ -23,7 +31,9 @@ export class Transaction {
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToMany(() => LedgerEntry, ledgerEntry => ledgerEntry.transaction, { cascade: true })
+  @OneToMany(() => LedgerEntry, (ledgerEntry) => ledgerEntry.transaction, {
+    cascade: true,
+  })
   ledgerEntries: LedgerEntry[];
 
   @Column({ default: false })
