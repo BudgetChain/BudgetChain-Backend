@@ -74,6 +74,15 @@ export class DatabaseError extends AppError {
 }
 
 /**
+ * Business logic related errors (e.g., insufficient funds, invalid status transitions)
+ */
+export class BusinessLogicError extends AppError {
+  constructor(message = 'Operation failed due to business rule violation') {
+    super(message);
+  }
+}
+
+/**
  * Type guard to check if an error is an instance of AppError
  */
 export function isAppError(error: unknown): error is AppError {
