@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { LoggingService } from '../../../config/logging.service';
 import { TreasuryAssetService } from './treasury-asset.service';
 import { TreasuryTransactionService } from './treasury-transaction.service';
@@ -35,6 +35,15 @@ export class TreasuryService {
       DECIMAL_PLACES: 18,
       ROUNDING_MODE: BigNumber.ROUND_DOWN,
     });
+  }
+
+  async findOne(id: string): Promise<Budget> {
+    const proposal =
+      await this.budgetService.findById(id);
+    if (!proposal) {
+      throw new NotFoundException(`Budget proposal with ID ${id} not found`);
+    }
+    return proposal;
   }
 
   /**
