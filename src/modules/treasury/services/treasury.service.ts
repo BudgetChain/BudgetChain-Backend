@@ -38,8 +38,7 @@ export class TreasuryService {
   }
 
   async findOne(id: string): Promise<Budget> {
-    const proposal =
-      await this.budgetService.findById(id);
+    const proposal = await this.budgetService.findById(id);
     if (!proposal) {
       throw new NotFoundException(`Budget proposal with ID ${id} not found`);
     }

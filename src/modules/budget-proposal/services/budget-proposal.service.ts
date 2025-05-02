@@ -3,8 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { BudgetProposalImpl, BudgetProposalRepository } from '../../repository/budget-proposal.repository';
+import { BudgetProposalImpl } from '../../repository/budget-proposal.repository';
 import { BudgetProposal } from '../entities/budget-proposal.entity';
 import { CreateBudgetProposalDto } from '../entities/dto/create-budget-proposal.dto';
 import { UpdateBudgetProposalDto } from '../entities/dto/update-budget-proposal.dto';
@@ -12,11 +11,9 @@ import { BudgetProposalStatus } from '../entities/budget-proposal.entity';
 import { User } from '../../user/entities/user.entity';
 import { TreasuryService } from '../../treasury/services/treasury.service';
 import { AddCommentDto } from '../entities/dto/add-comment.dto';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class BudgetProposalService {
-  
   constructor(
     private readonly budgetProposalRepository: BudgetProposalImpl,
     private readonly treasuryService: TreasuryService

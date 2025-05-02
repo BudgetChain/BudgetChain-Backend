@@ -73,9 +73,13 @@ export class BudgetProposal {
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   score: number | null;
 
-  @OneToMany(() => BudgetProposalCategory, category => category.budget_proposal, {
-    cascade: true,
-  })
+  @OneToMany(
+    () => BudgetProposalCategory,
+    category => category.budget_proposal,
+    {
+      cascade: true,
+    }
+  )
   categories: BudgetProposalCategory[];
 
   @OneToMany(() => BudgetProposalMetric, metric => metric.budget_proposal, {

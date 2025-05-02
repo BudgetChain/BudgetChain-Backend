@@ -46,7 +46,7 @@ export class BudgetProposalImpl
 
   // Read (Custom)
   async findByTreasuryId(treasuryId: string): Promise<BudgetProposal[]> {
-    return this.repo.find({ where: { treasuryId  } });
+    return this.repo.find({ where: { treasuryId } });
   }
 
   //   find with filters

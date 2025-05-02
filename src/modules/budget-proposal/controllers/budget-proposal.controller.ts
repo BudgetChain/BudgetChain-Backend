@@ -7,7 +7,6 @@ import {
   Put,
   Delete,
   Query,
-  UseGuards,
   Req,
 } from '@nestjs/common';
 import { BudgetProposalService } from '../services/budget-proposal.service';
@@ -18,6 +17,7 @@ import { Roles } from '../../../shared/decorators/roles.decorator';
 import { UserRole } from '../../user/entities/user.entity';
 import { AddCommentDto } from '../entities/dto/add-comment.dto';
 import { BudgetProposalStatus } from '../entities/budget-proposal.entity';
+import { AuthRequest } from '../../auth/types/auth.request';
 
 @Controller('budget-proposals')
 export class BudgetProposalController {
@@ -27,7 +27,7 @@ export class BudgetProposalController {
   @Roles(UserRole.USER)
   create(
     @Body() createBudgetProposalDto: CreateBudgetProposalDto,
-    @Req() req
+    @Req() req: AuthRequest
   ): Promise<BudgetProposal> {
     return this.budgetProposalService.create(createBudgetProposalDto, req.user);
   }
@@ -59,7 +59,7 @@ export class BudgetProposalController {
   update(
     @Param('id') id: string,
     @Body() updateBudgetProposalDto: UpdateBudgetProposalDto,
-    @Req() req
+    @Req() req: AuthRequest
   ): Promise<BudgetProposal> {
     return this.budgetProposalService.update(
       id,
@@ -72,7 +72,7 @@ export class BudgetProposalController {
   @Roles(UserRole.USER)
   submitForReview(
     @Param('id') id: string,
-    @Req() req
+    @Req() req: AuthRequest
   ): Promise<BudgetProposal> {
     return this.budgetProposalService.submitForReview(id, req.user);
   }
@@ -92,14 +92,14 @@ export class BudgetProposalController {
   addComment(
     @Param('id') id: string,
     @Body() addCommentDto: AddCommentDto,
-    @Req() req
+    @Req() req: AuthRequest
   ): Promise<BudgetProposal> {
     return this.budgetProposalService.addComment(id, addCommentDto, req.user);
   }
 
   @Delete(':id')
   @Roles(UserRole.USER)
-  remove(@Param('id') id: string, @Req() req): Promise<void> {
+  remove(@Param('id') id: string, @Req() req: AuthRequest): Promise<void> {
     return this.budgetProposalService.remove(id, req.user);
   }
 }

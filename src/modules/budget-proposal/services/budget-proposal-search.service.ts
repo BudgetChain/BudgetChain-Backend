@@ -4,7 +4,7 @@ import {
   BudgetProposal,
   BudgetProposalStatus,
 } from '../entities/budget-proposal.entity';
-import { Between, Like } from 'typeorm';
+import { Between, Like, FindOptionsWhere } from 'typeorm';
 
 @Injectable()
 export class BudgetProposalSearchService {
@@ -15,14 +15,14 @@ export class BudgetProposalSearchService {
   async search(
     query: string,
     treasuryId?: string,
-    status?: string,
+    status?: BudgetProposalStatus,
     submitterId?: string,
     minAmount?: number,
     maxAmount?: number,
     startDate?: Date,
     endDate?: Date
   ): Promise<BudgetProposal[]> {
-    const where: any = {};
+    const where: FindOptionsWhere<BudgetProposal> = {};
 
     if (query) {
       where.name = Like(`%${query}%`);

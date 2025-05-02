@@ -75,7 +75,4 @@ export class BudgetProposalTemplateService {
 
     return this.workflowService.completeProposal(proposal.id, user);
   }
-
-  async createFromDevelopmentTemplate(treasuryId: string, user: User) {
-  }
 }

@@ -15,6 +15,9 @@ export class BudgetProposalCategory {
   @Column()
   description: string;
 
-  @ManyToOne(() => BudgetProposal, budget_proposal => budget_proposal.categories)
+  @ManyToOne(
+    () => BudgetProposal,
+    budget_proposal => budget_proposal.categories
+  )
   budget_proposal: BudgetProposal;
 }

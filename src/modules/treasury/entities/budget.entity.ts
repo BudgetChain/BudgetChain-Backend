@@ -58,7 +58,7 @@ export class Budget {
   @OneToMany(() => Allocation, allocation => allocation.budget)
   allocations: Allocation[];
 
-  @OneToMany(() => BudgetProposal, (budget_proposal) => budget_proposal.treasury)
+  @OneToMany(() => BudgetProposal, budget_proposal => budget_proposal.treasury)
   budget_proposals: BudgetProposal[];
 
   @CreateDateColumn({ name: 'created_at' })
