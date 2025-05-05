@@ -15,6 +15,7 @@ import configuration from './config/configuration';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './modules/user/entities/user.entity';
+import { BudgetProposalModule } from './modules/budget-proposal/budget-proposal.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { User } from './modules/user/entities/user.entity';
     BudgetModule,
     AuthModule,
     TreasuryModule,
+    BudgetProposalModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST || 'localhost',

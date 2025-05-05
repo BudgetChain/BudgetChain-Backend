@@ -7,6 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Allocation } from './allocation.entity';
+import { BudgetProposal } from 'src/modules/budget-proposal/entities/budget-proposal.entity';
 
 export enum BudgetStatus {
   DRAFT = 'draft',
@@ -56,6 +57,9 @@ export class Budget {
 
   @OneToMany(() => Allocation, allocation => allocation.budget)
   allocations: Allocation[];
+
+  @OneToMany(() => BudgetProposal, budget_proposal => budget_proposal.treasury)
+  budget_proposals: BudgetProposal[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

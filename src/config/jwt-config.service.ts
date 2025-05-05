@@ -7,9 +7,8 @@ export class JwtConfigService {
   private readonly jwtExpiresIn: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.jwtSecret = this.configService.getOrThrow<string>('app.jwt.secret');
-    this.jwtExpiresIn =
-      this.configService.getOrThrow<string>('app.jwt.expiresIn');
+    this.jwtSecret = this.configService.getOrThrow<string>('jwt.secret');
+    this.jwtExpiresIn = this.configService.getOrThrow<string>('jwt.expiresIn');
   }
 
   get secret(): string {

@@ -1,5 +1,5 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import { config } from 'dotenv';
+config();
 
 // Helper to parse integers robustly
 const toInt = (value: string | undefined, fallback: number): number => {
