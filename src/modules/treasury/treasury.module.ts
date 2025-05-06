@@ -18,9 +18,13 @@ import { Budget } from './entities/budget.entity';
 import { Allocation } from './entities/allocation.entity';
 import { AllocationTransaction } from './entities/allocation-transaction.entity';
 import { Asset } from './entities/asset.entity';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { TreasuryEventHandler } from './events/treasury.event-handler';
+import { TreasuryEventEmitter } from './events/treasury.events';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     TypeOrmModule.forFeature([
       Transaction,
       LedgerEntry,
@@ -42,6 +46,8 @@ import { Asset } from './entities/asset.entity';
     TreasuryAssetService,
     LoggingService,
     StarknetService,
+    TreasuryEventEmitter,
+    TreasuryEventHandler,
   ],
   controllers: [TransactionController],
   exports: [TreasuryService],

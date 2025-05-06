@@ -4,6 +4,8 @@ import { TreasuryAssetService } from './treasury-asset.service';
 import { TreasuryTransactionService } from './treasury-transaction.service';
 import { TreasuryBudgetService } from './treasury-budget.service';
 import { TreasuryAllocationService } from './treasury-allocation.service';
+import { CreateTreasuryDto } from '../dto/create-treasury.dto';
+import { UpdateTreasuryDto } from '../dto/update-treasury.dto';
 import {
   formatErrorMessage,
   BusinessLogicError,
@@ -13,6 +15,15 @@ import { Asset } from '../entities/asset.entity';
 import { TransactionType } from '../entities/asset-transaction.entity';
 import { Budget, BudgetStatus } from '../entities/budget.entity';
 import { Allocation, AllocationStatus } from '../entities/allocation.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Treasury } from 'src/modules/user/entities/treasury.entity';
+import { Repository } from 'typeorm';
+import {
+  TreasuryEventEmitter,
+  TreasuryCreatedEvent,
+  TreasuryUpdatedEvent,
+  TreasuryDeletedEvent,
+} from '../events/treasury.events';
 
 /**
  * Main Treasury Service that coordinates operations across the treasury module.
@@ -25,6 +36,10 @@ export class TreasuryService {
     private transactionService: TreasuryTransactionService,
     private budgetService: TreasuryBudgetService,
     private allocationService: TreasuryAllocationService,
+    private treasuryEventEmitter: TreasuryEventEmitter,
+    @InjectRepository(Treasury)
+    private treasuryRepo: Repository<Treasury>,
+
     @Inject(LoggingService)
     private logger: LoggingService
   ) {
@@ -44,7 +59,52 @@ export class TreasuryService {
     }
     return proposal;
   }
+  async create(data: CreateTreasuryDto): Promise<Treasury> {
+    const treasury = this.treasuryRepo.create({
+      name: data.name,
+      totalBalance: data.initialBalance || 0,
+    });
+    const saved = await this.treasuryRepo.save(treasury);
 
+    this.treasuryEventEmitter.emitCreated(
+      new TreasuryCreatedEvent(saved.id, saved.name, saved.totalBalance)
+    );
+
+    return saved;
+  }
+
+  async findTreasuryById(id: string): Promise<Treasury> {
+    const treasury = await this.treasuryRepo.findOneBy({ id });
+    if (!treasury)
+      throw new NotFoundException(`Treasury with ID ${id} not found`);
+    return treasury;
+  }
+
+  async update(id: string, data: UpdateTreasuryDto): Promise<Treasury> {
+    const treasury = await this.findTreasuryById(id);
+    // const previousBalance = treasury.totalBalance;
+
+    Object.assign(treasury, data);
+    const updated = await this.treasuryRepo.save(treasury);
+
+    const changes: Partial<{ name: string; balance: number }> = {};
+    if (data.name) changes.name = data.name;
+    if (data.initialBalance !== undefined)
+      changes.balance = data.initialBalance;
+
+    this.treasuryEventEmitter.emitUpdated(
+      new TreasuryUpdatedEvent(id, changes)
+    );
+
+    return updated;
+  }
+
+  async delete(id: string): Promise<void> {
+    const treasury = await this.findTreasuryById(id);
+    await this.treasuryRepo.remove(treasury);
+
+    this.treasuryEventEmitter.emitDeleted(new TreasuryDeletedEvent(id));
+  }
   /**
    * Get treasury overview with balances, allocations, and recent activity
    */
