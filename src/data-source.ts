@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   host: 'localhost',
   port: 5432,
   username: 'postgres',
-  password: 'www.comdb',
+  password: '',
   database: 'treasury_db',
   entities: [
     Treasury,
